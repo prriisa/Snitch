@@ -2,7 +2,9 @@ import "dotenv/config"
 
 const config = {
     port : process.env.PORT,
-    mongoUri : process.env.MONGO_URI
+    mongoUri : process.env.MONGO_URI,
+    accessTokenJwt : process.env.ACCESS_JWT,
+    refreshTokenJwt : process.env.REFRESH_JWT
 }
 
 export default config
