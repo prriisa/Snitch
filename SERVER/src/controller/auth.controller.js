@@ -158,6 +158,12 @@ export const getMe = async (req, res) => {
 
         let userData = await RegisterModel.findById(userId)
 
+        if(!userData){
+            return res.status(400).json({
+                message:"user not found"
+            })
+        }
+
         res.status(200).json({
             message: "user data fetched successfully",
             data: {

@@ -6,10 +6,10 @@ let router = Router()
 
 router.post("/register", registerValidator, registerUserController)
 
-router.post("/login",loginValidator, loginUserController)
+router.post("/login", loginValidator, loginUserController)
 
-router.get("/refresh" , refreshTokenController)
+router.get("/refresh", refreshTokenController)
 
-router.post("/me" , getMe)
+router.post("/me", getMe)
 
 export default router
