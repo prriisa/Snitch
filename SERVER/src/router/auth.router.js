@@ -1,6 +1,6 @@
 import express, { Router } from "express"
 import { loginUserController, refreshTokenController, registerUserController, getMe } from "../controller/auth.controller.js"
-import { loginValidator, registerValidator } from "../validator/validator.js"
+import { loginValidator, registerValidator } from "../validator/auth.validator.js"
 
 let router = Router()
 
