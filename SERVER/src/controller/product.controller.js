@@ -2,7 +2,6 @@ import productModel from "../model/product.model.js"
 import uploadFiles from "../services/storage.service.js"
 
 export const createNewProductController = async (req, res) => {
-
     try {
         const { title, description, price, sizes } = req.body
         let files = req.files
@@ -32,6 +31,26 @@ export const createNewProductController = async (req, res) => {
         console.log(error)
         res.status(500).json({
             message: "internal server error"
+        })
+    }
+}
+
+export const fetchAllProductController = async(req, res) => {
+    try {
+
+        const allProducts = await productModel.find()
+
+        res.status(200).json({
+            message:"all products data fetched successfully",
+            data:{
+                allProducts
+            }
+        })
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message:"internal server error"
         })
     }
 }
