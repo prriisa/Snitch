@@ -9,18 +9,25 @@ const router = Router()
 router.post(
     "/create",
     authenticate,
-    (req, res, next => {
-        const { userData } = req.user
+    (req, res, next) => {
+        const { role } = req.user
 
-        if (userData.role !== "seller") {
+        if (role !== "seller") {
             return res.status(403).json({
                 message: "invalid request"
             })
         }
 
         next()
-    }),
-    upload,
+    },
+    upload.array("images", 5),
+    (req, res, next) => {
+        req.body.price = JSON.parse(req.body.price)
+        req.body.sizes = JSON.parse(req.body.sizes)
+
+        next()
+    },
     productValidator,
-    createNewProductController
-)
+    createNewProductController)
+
+export default router

@@ -148,7 +148,7 @@ export const refreshTokenController = async (req, res) => {
 export const getMe = async (req, res) => {
 
     try {
-        let { userId } = req.user
+        let userId = req.user.id
 
         if (!userId) {
             return res.status(400).json({

@@ -1,7 +1,8 @@
-import { readAccessToken } from "../utils/auth.utils"
+import { readAccessToken } from "../utils/auth.utils.js"
 
 const authenticate = (req, res, next) => {
-    let accessToken = req.header.authorization
+
+    const accessToken = req.headers.authorization
 
     if (!accessToken) {
         return res.status(400).json({
@@ -13,7 +14,7 @@ const authenticate = (req, res, next) => {
 
         let decoded = readAccessToken(accessToken)
 
-        res.user = decoded
+        req.user = decoded
 
         next()
 

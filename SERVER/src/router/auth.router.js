@@ -1,15 +1,16 @@
 import express, { Router } from "express"
 import { loginUserController, refreshTokenController, registerUserController, getMe } from "../controller/auth.controller.js"
 import { loginValidator, registerValidator } from "../validator/auth.validator.js"
+import authenticate from "../middleware/auth.middleware.js"
 
-let router = Router()
+let authRouter = Router()
 
-router.post("/register", registerValidator, registerUserController)
+authRouter.post("/register", registerValidator, registerUserController)
 
-router.post("/login", loginValidator, loginUserController)
+authRouter.post("/login", loginValidator, loginUserController)
 
-router.get("/refresh", refreshTokenController)
+authRouter.get("/refresh", refreshTokenController)
 
-router.post("/me", getMe)
+authRouter.post("/me", authenticate, getMe)
 
-export default router
+export default authRouter
