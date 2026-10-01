@@ -1,125 +1,70 @@
-import React from "react";
+import { ArrowRight } from "lucide-react";
 
 const Login = () => {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen w-full flex bg-black text-white">
 
+      {/* Left side - banner image */}
+      <div className="hidden md:flex w-1/2">
+        <img
+          src="https://cdn.shopify.com/s/files/1/0420/7073/7058/files/login.jpg?v=1737548884&quality=80"
+          alt="Login banner"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Right side - form */}
+      <div className="flex-1 flex flex-col justify-center px-8 py-12">
         {/* Logo */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-black tracking-[-2px] text-black">
-            SNITCH
-          </h1>
+        <div className="flex justify-center mb-10">
+          <h1 className="text-4xl font-bold tracking-[0.3em]">SNITCH</h1>
         </div>
 
-        {/* Login Card */}
-        <div className="w-full">
-          <h2 className="text-2xl font-semibold text-gray-900 text-center">
-            Welcome Back
-          </h2>
-
-          <p className="text-sm text-gray-500 text-center mt-2 mb-8">
-            Login to continue shopping
-          </p>
-
-          {/* Mobile / Email */}
-          <div className="mb-5">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-800 mb-2"
-            >
-              Email or Mobile Number
-            </label>
-
-            <input
-              id="email"
-              type="text"
-              placeholder="Enter email or mobile number"
-              className="w-full h-12 border border-gray-300 px-4 text-sm outline-none
-              transition-all duration-200
-              focus:border-black
-              placeholder:text-gray-400"
-            />
-          </div>
+        {/* Form */}
+        <div className="w-full max-w-sm mx-auto">
+          {/* Email */}
+          <label className="block text-gray-300 mb-3 tracking-wide text-xs uppercase">
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="johndoe@gmail.com"
+            className="w-full h-[40px] border-b border-gray-600 bg-transparent text-white px-3 py-3 text-sm placeholder-gray-600 focus:outline-none focus:border-white"
+          />
 
           {/* Password */}
-          <div className="mb-2">
-            <div className="flex items-center justify-between mb-2">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-800"
-              >
-                Password
-              </label>
+          <label className="block text-gray-300 mt-6 mb-3 tracking-wide text-xs uppercase">
+            Password
+          </label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            className="w-full h-[40px] border-b border-gray-600 bg-transparent text-white px-3 py-3 text-sm placeholder-gray-600 focus:outline-none focus:border-white"
+          />
 
-              <button
-                type="button"
-                className="text-xs text-gray-600 hover:text-black underline"
-              >
-                Forgot Password?
-              </button>
-            </div>
-
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              className="w-full h-12 border border-gray-300 px-4 text-sm outline-none
-              transition-all duration-200
-              focus:border-black
-              placeholder:text-gray-400"
-            />
-          </div>
-
-          {/* Login Button */}
-          <button
-            type="button"
-            className="w-full h-12 mt-6 bg-black text-white text-sm
-            font-semibold tracking-wide
-            hover:bg-gray-800 transition-colors duration-200"
-          >
-            LOGIN
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-7">
-            <div className="h-px bg-gray-200 flex-1" />
-
-            <span className="text-xs text-gray-400 uppercase">
-              OR
-            </span>
-
-            <div className="h-px bg-gray-200 flex-1" />
-          </div>
-
-          {/* Google */}
-          <button
-            type="button"
-            className="w-full h-12 border border-gray-300
-            flex items-center justify-center gap-3
-            text-sm font-medium text-gray-800
-            hover:bg-gray-50 transition-colors duration-200"
-          >
-            <span className="text-base font-bold">G</span>
-            Continue with Google
-          </button>
-
-          {/* Register */}
-          <p className="text-center text-sm text-gray-500 mt-8">
-            Don't have an account?{" "}
+          {/* Login button */}
+          <div className="w-full my-8">
             <button
               type="button"
-              className="text-black font-semibold underline underline-offset-2"
+              className="inline-flex items-center justify-center w-full py-4 text-black bg-white border border-black hover:bg-gray-200 rounded-md font-medium transition"
             >
-              Create Account
+              Login
+              <ArrowRight size={18} className="ml-2" />
             </button>
-          </p>
-        </div>
+          </div>
 
-        {/* Bottom text */}
-        <p className="text-center text-[11px] text-gray-400 mt-10">
-          By continuing, you agree to our Terms & Conditions and Privacy Policy.
-        </p>
+          {/* Terms */}
+          <div className="text-center text-gray-400 text-[11px]">
+            By continuing, you agree to SNITCH’s{" "}
+            <a href="/terms" className="underline text-white">
+              Terms & Conditions
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" className="underline text-white">
+              Privacy Policy
+            </a>.
+          </div>
+        </div>
       </div>
     </div>
   );
