@@ -1,68 +1,83 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import { Navlink } from "react-router";
+import imgDesktop from "../../assets/login-Img.avif";
+import imgMobile from "../../assets/login-Img2.avif";
 
 const Login = () => {
   return (
-    <div className="min-h-screen w-full flex bg-black text-white">
+    <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
 
-      {/* Left side - banner image */}
-      <div className="hidden md:flex w-1/2">
-        <img
-          src="https://cdn.shopify.com/s/files/1/0420/7073/7058/files/login.jpg?v=1737548884&quality=80"
-          alt="Login banner"
-          className="w-full h-full object-cover"
-        />
+      {/* Back Arrow */}
+      <div className="flex items-center px-6 py-4">
+        <Navlink to="/" className="text-neutral-400 hover:text-white transition flex items-center gap-2">
+          <ArrowLeft size={22} />
+        </Navlink>
       </div>
 
-      {/* Right side - form */}
-      <div className="flex-1 flex flex-col justify-center px-8 py-12">
-        {/* Logo */}
-        <div className="flex justify-center mb-10">
-          <h1 className="text-4xl font-bold tracking-[0.3em]">SNITCH</h1>
-        </div>
+      {/* Main Row */}
+      <div className="flex flex-1 flex-col md:flex-row">
 
-        {/* Form */}
-        <div className="w-full max-w-sm mx-auto">
-          {/* Email */}
-          <label className="block text-gray-300 mb-3 tracking-wide text-xs uppercase">
-            Email Address
-          </label>
-          <input
-            type="email"
-            placeholder="johndoe@gmail.com"
-            className="w-full h-[40px] border-b border-gray-600 bg-transparent text-white px-3 py-3 text-sm placeholder-gray-600 focus:outline-none focus:border-white"
-          />
+        {/* Left side - image */}
+        <div className="w-full md:w-1/2 h-64 md:h-full flex flex-col">
 
-          {/* Password */}
-          <label className="block text-gray-300 mt-6 mb-3 tracking-wide text-xs uppercase">
-            Password
-          </label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            className="w-full h-[40px] border-b border-gray-600 bg-transparent text-white px-3 py-3 text-sm placeholder-gray-600 focus:outline-none focus:border-white"
-          />
-
-          {/* Login button */}
-          <div className="w-full my-8">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center w-full py-4 text-black bg-white border border-black hover:bg-gray-200 rounded-md font-medium transition"
-            >
-              Login
-              <ArrowRight size={18} className="ml-2" />
-            </button>
+          {/* Mobile Logo + Heading */}
+          <div className="block md:hidden flex flex-col items-center py-4 space-y-2">
+            <h1 className="text-3xl font-bold tracking-[0.3em]">SNITCH</h1>
+            <h2 className="text-xs tracking-[0.2em] text-neutral-400">LOGIN TO YOUR ACCOUNT</h2>
           </div>
 
-          {/* Terms */}
-          <div className="text-center text-gray-400 text-[11px]">
-            By continuing, you agree to SNITCH’s{" "}
-            <a href="/terms" className="underline text-white">
-              Terms & Conditions
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" className="underline text-white">
-              Privacy Policy
-            </a>.
+          {/* Mobile Image */}
+          <img src={imgMobile} alt="Login Mobile" className="block md:hidden w-full h-full object-cover" />
+
+          {/* Desktop Image */}
+          <img src={imgDesktop} alt="Login Desktop" className="hidden md:block w-full h-screen object-cover" />
+        </div>
+
+        {/* Right side - form */}
+        <div className="w-full md:w-1/2 flex flex-col h-full px-6 py-6 md:py-10">
+
+          {/* Desktop Logo + Heading */}
+          <div className="hidden md:flex flex-col items-center mb-4 md:mb-6 space-y-2">
+            <h1 className="text-4xl font-bold tracking-[0.3em]">SNITCH</h1>
+            <h2 className="text-xs tracking-[0.2em] text-neutral-400">LOGIN TO YOUR ACCOUNT</h2>
+          </div>
+
+          {/* Form */}
+          <div className="flex-grow flex flex-col items-center justify-center">
+            <div className="w-full max-w-md space-y-6 text-center">
+
+              {/* Email */}
+              <div className="text-left">
+                <label className="block text-xs text-neutral-400 mb-2 uppercase">Email Address</label>
+                <input type="email" placeholder="johndoe@gmail.com"
+                  className="w-full bg-transparent border-b border-neutral-700 py-3 outline-none focus:border-white transition" />
+              </div>
+
+              {/* Password */}
+              <div className="text-left">
+                <label className="block text-xs text-neutral-400 mb-2 uppercase">Password</label>
+                <input type="password" placeholder="••••••••"
+                  className="w-full bg-transparent border-b border-neutral-700 py-3 outline-none focus:border-white transition" />
+              </div>
+
+              {/* Login Button */}
+              <button className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition">
+                Login <ArrowRight size={18} />
+              </button>
+
+              
+              {/* Register */}
+              <p className="text-center text-sm text-neutral-400 mt-4">
+                Don't have an account? <Navlink to="/register" className="text-white underline">Register</Navlink>
+              </p>
+
+
+              {/* Terms & Conditions directly below button */}
+              <p className="text-[11px] text-neutral-500 mt-2">
+                By continuing, you agree to our Terms & Conditions and Privacy Policy.
+              </p>
+
+            </div>
           </div>
         </div>
       </div>
