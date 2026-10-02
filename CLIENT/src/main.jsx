@@ -3,6 +3,8 @@ import './index.css'
 import { RouterProvider } from 'react-router'
 import router from './router/Approutes.jsx'
 
+import "./index.css";
+
 
 createRoot(document.getElementById('root')).render(
     <RouterProvider router={router}/>
