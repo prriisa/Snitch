@@ -123,7 +123,7 @@ const Register = () => {
 
               {/* Already have account */}
               <p className="text-center text-sm text-neutral-400 mt-4 font-[__helveticaLight_ba7d87]">
-                Already have an account? <NavLink to="/login" className="text-white underline">Login</NavLink>
+                Already have an account? <NavLink to="/" className="text-white underline">Login</NavLink>
               </p>
 
               {/* Terms */}

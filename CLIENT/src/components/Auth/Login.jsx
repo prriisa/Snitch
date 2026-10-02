@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { Navlink } from "react-router";
+import { NavLink } from "react-router";
 import imgDesktop from "../../assets/login-Img.avif";
 import imgMobile from "../../assets/login-Img2.avif";
 
@@ -9,9 +9,9 @@ const Login = () => {
 
       {/* Back Arrow */}
       <div className="flex items-center px-6 py-4">
-        <Navlink to="/" className="text-neutral-400 hover:text-white transition flex items-center gap-2">
+        <NavLink to="/" className="text-neutral-400 hover:text-white transition flex items-center gap-2">
           <ArrowLeft size={22} />
-        </Navlink>
+        </NavLink>
       </div>
 
       {/* Main Row */}
@@ -68,7 +68,7 @@ const Login = () => {
               
               {/* Register */}
               <p className="text-center text-sm text-neutral-400 mt-4">
-                Don't have an account? <Navlink to="/register" className="text-white underline">Register</Navlink>
+                Don't have an account? <NavLink to="/register" className="text-white underline">Register</NavLink>
               </p>
 
 
