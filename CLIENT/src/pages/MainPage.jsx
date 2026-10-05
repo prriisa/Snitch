@@ -6,6 +6,7 @@ import ShopYourSize from '../components/Main/ShopBySize'
 import ShopByOccasion from '../components/Main/ShopByOccasion'
 import ShopByPrice from '../components/Main/ShopByPrice'
 import Footer from '../components/Main/Footer'
+import ProductsPage from './ProductsPage'
 
 const MainPage = () => {
   return (
@@ -15,6 +16,7 @@ const MainPage = () => {
         <ShopYourSize/>
         <ShopByOccasion/>
         <ShopByPrice/>
+        <ProductsPage/>
         <Footer/>
     </div>
   )
