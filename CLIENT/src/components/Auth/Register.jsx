@@ -1,12 +1,42 @@
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate, useOutletContext } from "react-router";
 import { useState } from "react";
 import imgDesktop from "../../assets/register-Img.avif";
 import imgMobile from "../../assets/register-Img2.avif";
+import { useForm } from "react-hook-form";
+import { registerUser } from "../../api/api";
+import { useDispatch } from "react-redux";
+import { setToast } from "../../redux/Slice/toastSlice";
 
 const Register = () => {
+
+  const dispatch = useDispatch()
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [registerError, setRegisterError] = useState(null)
+  const navigate = useNavigate()
+ 
+  const { handleSubmit, reset, register, getValues, formState: { errors } } = useForm({ mode: "onChange" })
+
+  const onSubmit = async (data) => {
+    try {
+      let response = await registerUser(data)
+      console.log(response)
+      setRegisterError(null)
+
+      reset()
+      navigate("/")
+
+      dispatch(setToast({
+        success: true,
+        message: response.data.message,
+      }))
+
+    } catch (error) {
+      setRegisterError(error.response?.data.message)
+      console.log(error.response?.data)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -14,7 +44,7 @@ const Register = () => {
       {/* Back Arrow */}
       <div className="flex items-center px-6 py-4">
         <NavLink
-          to="/"
+          to="/login"
           className="text-neutral-400 hover:text-white transition flex items-center gap-2"
         >
           <ArrowLeft size={22} />
@@ -46,42 +76,70 @@ const Register = () => {
           </div>
 
           {/* Form */}
-          <div className="flex flex-col items-center justify-center flex-grow">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center flex-grow">
             <div className="w-full max-w-md space-y-6 text-center">
 
               {/* Name */}
               <div className="text-left">
                 <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase">Full Name</label>
-                <input type="text" placeholder="John Doe"
+                <input
+                  {...register("name", {
+                    required: "name is required",
+                    minLength: {
+                      value: 3,
+                      message: "minimum 3 characters are required"
+                    },
+                    maxLength: {
+                      value: 15,
+                      message: "maximum 15 characters are required"
+                    }
+                  })}
+                  type="text" placeholder="John Doe"
                   className="w-full bg-transparent border-b border-neutral-700 py-3 
                              placeholder-neutral-500 outline-none focus:border-white transition 
                              text-white font-[__helveticaLight_ba7d87]" />
               </div>
+              {errors.name && <p className="text-red-500 text-right">{errors.name.message}</p>}
+
 
               {/* Email */}
               <div className="text-left">
                 <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase">Email Address</label>
-                <input type="email" placeholder="example@email.com"
+                <input
+                  {...register("email", {
+                    required: "email is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                      message: "enter a valid email"
+                    }
+                  })}
+                  type="email" placeholder="example@email.com"
                   className="w-full bg-transparent border-b border-neutral-700 py-3 
                              placeholder-neutral-500 outline-none focus:border-white transition 
                              text-white font-[__helveticaLight_ba7d87]" />
               </div>
+              {errors.email && <p className="text-red-500 text-right">{errors.email.message}</p>}
 
-              {/* Phone */}
-              <div className="text-left">
-                <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase">Phone Number</label>
-                <div className="flex items-center border-b border-neutral-700 py-3">
-                  <span className="text-neutral-400 font-[__helveticaLight_ba7d87] mr-2">+91</span>
-                  <input type="tel" placeholder="9876543210"
-                    className="flex-1 bg-transparent outline-none placeholder-neutral-500 
-                               text-white font-[__helveticaLight_ba7d87] focus:border-white transition" />
-                </div>
-              </div>
 
               {/* Password */}
               <div className="text-left relative">
                 <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase">Password</label>
                 <input
+                  {...register("password", {
+                    required: "password is required",
+                    minLength: {
+                      value: 6,
+                      message: "minimum 6 characters are required"
+                    },
+                    maxLength: {
+                      value: 32,
+                      message: "maximum 32 characters are required"
+                    },
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$/,
+                      message: "include at least one uppercase letter, one lowercase letter, one number, and one special character (e.g., @, $, !, %)."
+                    }
+                  })}
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="w-full bg-transparent border-b border-neutral-700 py-3 
@@ -96,11 +154,16 @@ const Register = () => {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {errors.password && <p className="text-red-500 text-right">{errors.password.message}</p>}
 
               {/* Confirm Password */}
               <div className="text-left relative">
                 <label className="block text-xs font-bold text-neutral-300 mb-2 uppercase">Confirm Password</label>
                 <input
+                  {...register("confirmPassword", {
+                    required: "confirm password is required",
+                    validate: (value) => value === getValues("password") || "password doesn't match"
+                  })}
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="w-full bg-transparent border-b border-neutral-700 py-3 
@@ -115,15 +178,22 @@ const Register = () => {
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {errors.confirmPassword && <p className="text-red-500 text-right">{errors.confirmPassword.message}</p>}
+
 
               {/* Register Button */}
-              <button className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition font-[__helveticaLight_ba7d87]">
+              <button type="submit" className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition font-[__helveticaLight_ba7d87]">
                 Register
               </button>
 
+
+              {/* Error Message */}
+              <p className="text-red-500 mt-[-20px]">{registerError}</p>
+
+
               {/* Already have account */}
               <p className="text-center text-sm text-neutral-400 mt-4 font-[__helveticaLight_ba7d87]">
-                Already have an account? <NavLink to="/" className="text-white underline">Login</NavLink>
+                Already have an account? <NavLink to="/login" className="text-white underline">Login</NavLink>
               </p>
 
               {/* Terms */}
@@ -132,7 +202,7 @@ const Register = () => {
               </p>
 
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
