@@ -7,52 +7,74 @@ import MainPage from "../pages/MainPage";
 import CartPage from "../pages/CartPage";
 import WishListPage from "../pages/WishListPage";
 import ShopPage from "../pages/ShopPage";
+import SingleProductPage from "../pages/SingleProductPage";
+import Me from "../components/Main/Me";
+import PrivateRoute from "./PrivateRoute";
+import { refreshTokens } from "../api/api";
+import { useDispatch } from "react-redux";
+import { useEffect, useRef } from "react";
+import axiosInstance from "../api/axiosInstance";
+import { authenticate } from "../redux/Slice/authSlice";
+
+await refreshTokens()
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "",
     element: <MainLayout />,
     children: [
+      { index: "/", element: <MainPage /> },
+      { path: "/cart", element: <CartPage /> },
+      { path: "/wishlist", element: <WishListPage /> },
+      { path: "shop", element: <ShopPage /> },
+      { path: "product/:id", element: <SingleProductPage /> },
+
+      // private route
       {
-        index: true,
-        element: <MainPage />,
-      },
-      {
-        path: "cart",
-        element: <CartPage />,
-      },
-      {
-        path: "wishlist",
-        element: <WishListPage />,
-      },
-      {
-        path: "shop",
-        element: <ShopPage />,
+        element: <PrivateRoute />,
+        children: [
+          { path: "me", element: <Me />, },
+          { path: "createNewProduct", element: <></> }
+        ],
       },
     ],
   },
 
   {
-    path: "/login",
+    path: "",
     element: <AuthLayout />,
     children: [
-      {
-        index: true,
-        element: <Login />,
-      },
+      { path: "login", element: <Login /> },
+      { path: "/register", element: <Register /> }
     ],
   },
 
-  {
-    path: "/register",
-    element: <AuthLayout />,
-    children: [
-      {
-        index: true,
-        element: <Register />,
-      },
-    ],
-  },
 ]);
+
+const AppRoutes = () => {
+  let dispatch = useDispatch()
+  const hasRestoredSession = useRef(false)
+
+
+  useEffect(() => {
+    if (hasRestoredSession.current = true) return
+    hasRestoredSession.current = true
+
+
+    const restoreSession = async () => {
+      try {
+        let response = await refreshTokens()
+        dispatch(authenticate({
+          user : response.data.data.userData,
+          accessToken : response.data.accessToken
+
+        }))
+
+      } catch (error) {
+
+      }
+    }
+  }, [])
+}
 
 export default router;

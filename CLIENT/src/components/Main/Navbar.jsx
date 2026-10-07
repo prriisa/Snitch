@@ -1,6 +1,10 @@
+import { useSelector } from "react-redux";
 import { NavLink } from "react-router";
 
 const Navbar = () => {
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
+    console.log(isAuthenticated)
+
     return (
         <header className="fixed inset-x-0 top-0 z-[70]">
             <div className="mx-auto flex h-[58px] max-w-[480px] items-center border-b border-black/10 bg-white px-[25px] md:h-[86px] md:max-w-full md:px-[40px]">
@@ -40,6 +44,13 @@ const Navbar = () => {
                         </svg>
                     </button>
 
+                    {/* Create Product */}
+                    <NavLink to="/products/create">
+                        <button type="button" aria-label="Search" className="flex items-center justify-center">
+                            <h1 className="h-5 w-5 text-xl md:h-7 md:w-7">+</h1>
+                        </button>
+                    </NavLink>
+
                     {/* Bag */}
                     <NavLink to="/cart">
                         <button type="button" aria-label="Bag" className="hidden items-center justify-center md:flex">
@@ -59,7 +70,7 @@ const Navbar = () => {
                     </NavLink>
 
                     {/* Profile */}
-                    <NavLink to="/login">
+                    <NavLink to={isAuthenticated === true ? "/me" : "/login"}>
                         <button type="button" aria-label="Profile" className="flex items-center justify-center">
                             <svg viewBox="0 0 30 30" fill="none" className="h-5 w-5 md:h-7 md:w-7">
                                 <path d="M23.75 26.25v-2.5a5 5 0 0 0-5-5h-7.5a5 5 0 0 0-5 5v2.5M20 8.75a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z" stroke="#000" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
