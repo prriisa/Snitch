@@ -158,9 +158,9 @@ export const getMe = async (req, res) => {
 
         let userData = await RegisterModel.findById(userId)
 
-        if(!userData){
+        if (!userData) {
             return res.status(400).json({
-                message:"user not found"
+                message: "user not found"
             })
         }
 
@@ -174,6 +174,38 @@ export const getMe = async (req, res) => {
                     role: userData.role
                 }
             }
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
+}
+
+export const logOutController = async (req, res) => {
+    try {
+        const userData = req.user
+
+        if (!userData.id) {
+            return res.status(400).json({
+                message: "invalid token payload"
+            })
+        }
+
+        let dbUser = await RegisterModel.findById(userData.id)
+
+        if (!dbUser) {
+            return res.status(404).json({
+                message: "404 user not found"
+            })
+        }
+
+        res.clearCookie("refreshToken", { httpOnly: true })
+
+        res.status(200).json({
+            message: "user logged out successfully"
         })
 
     } catch (error) {
