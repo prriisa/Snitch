@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
 import Login from "../components/Auth/Login";
@@ -15,8 +15,6 @@ import { useDispatch } from "react-redux";
 import { useEffect, useRef } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { authenticate } from "../redux/Slice/authSlice";
-
-await refreshTokens()
 
 const router = createBrowserRouter([
   {
@@ -57,7 +55,7 @@ const AppRoutes = () => {
 
 
   useEffect(() => {
-    if (hasRestoredSession.current = true) return
+    if (hasRestoredSession.current) return
     hasRestoredSession.current = true
 
 
@@ -65,16 +63,18 @@ const AppRoutes = () => {
       try {
         let response = await refreshTokens()
         dispatch(authenticate({
-          user : response.data.data.userData,
-          accessToken : response.data.accessToken
-
+          user: response.data.data.userData,
+          accessToken: response.data.data.accessToken
         }))
 
       } catch (error) {
-
+        console.log(error)
       }
     }
-  }, [])
+    restoreSession()
+  }, [dispatch])
+
+  return <RouterProvider router={router} />;
 }
 
-export default router;
+export default AppRoutes;

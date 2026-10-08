@@ -33,3 +33,21 @@ select:-webkit-autofill:focus {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}

@@ -6,10 +6,11 @@ import { Provider } from "react-redux"
 import { store } from './redux/store.jsx'
 
 import "./index.css";
+import AppRoutes from './router/Approutes.jsx'
 
 
 createRoot(document.getElementById('root')).render(
     <Provider store={store}>
-        <RouterProvider router={router} />
+        <AppRoutes />
     </Provider>
 )
