@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose"
+import mongoose from "mongoose"
 
 const cartSchema = mongoose.Schema({
     products: [
@@ -21,7 +21,7 @@ const cartSchema = mongoose.Schema({
         }
     ],
     user: {
-        type: Mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "registeredUsers",
         required: true
     }
