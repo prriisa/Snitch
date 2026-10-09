@@ -17,4 +17,8 @@ const uploadFiles = async (buffer, fileName) => {
     return response
 }
 
+export const DeleteFiles = async(fileId) => {
+    await client.files.delete(fileId)
+}
+
 export default uploadFiles

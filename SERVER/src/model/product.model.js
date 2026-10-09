@@ -15,7 +15,14 @@ const productSchema = new mongoose.Schema({
     },
     images: {
         type: [{
-            type: String
+            url:{
+                type:String,
+                required:true
+            },
+            fileId:{
+                required:true,
+                type:String
+            }
         }],
         validate: {
             validator: images => images.length <= 5,

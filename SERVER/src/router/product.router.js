@@ -1,8 +1,9 @@
-import express, { Router } from "express"
 import authenticate from "../middleware/auth.middleware.js"
-import { createNewProductController, fetchAllProductController } from "../controller/product.controller.js"
+import { createNewProductController, deleteProductController, fetchAllProductController, fetchSingleProductController, updateProductController } from "../controller/product.controller.js"
 import { productValidator } from "../validator/product.validator.js"
 import upload from "../config/multer.js"
+import { idValidator, isSeller } from "../middleware/product.middleware.js"
+import { Router } from "express"
 
 const router = Router()
 
@@ -48,11 +49,33 @@ router.post(
     productValidator,
 
     // create new product controller
-    
+
     createNewProductController)
 
 
 
-router.get("/all" , fetchAllProductController)
+router.get("/", fetchAllProductController)
+
+router.get("/:id", idValidator, fetchSingleProductController)
+
+router.delete("/:id/delete",
+
+    idValidator,
+
+    authenticate,
+
+    isSeller,
+
+    deleteProductController)
+
+router.post("/:id/update",
+    idValidator,
+
+    authenticate,
+
+    isSeller,
+
+    updateProductController
+)
 
 export default router
