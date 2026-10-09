@@ -75,6 +75,22 @@ router.post("/:id/update",
 
     isSeller,
 
+    upload.array("newImages", 5),
+
+    (req, res, next) => {
+        try {
+            req.body.price = JSON.parse(req.body.price)
+            req.body.sizes = JSON.parse(req.body.sizes)
+
+            next()
+        } catch (error) {
+            return res.status(400).json({
+                message: "Invalid price or sizes format",
+            })
+        }
+    },
+    productValidator,
+
     updateProductController
 )
 

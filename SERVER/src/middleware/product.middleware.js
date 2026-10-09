@@ -31,7 +31,7 @@ export const idValidator = async (req, res, next) => {
 
 export const isSeller = async (req, res, next) => {
     
-    if (!req.user.role === "seller") {
+    if (req.user.role !== "seller") {
         return res.status(400).json({
             message: "invalid request"
         })
@@ -45,7 +45,7 @@ export const isSeller = async (req, res, next) => {
         })
     }
     
-    if (!req.user.id === product.seller) {
+    if (req.user.id !== product.seller.toString()) {
         return res.status(403).json({
             message: "UnAuthorized user"
         })
