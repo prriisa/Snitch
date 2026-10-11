@@ -1,4 +1,4 @@
-import {body, validationResult} from "express-validator"
+import { body, validationResult } from "express-validator"
 
 export const addToCartValidator = [
 
@@ -11,7 +11,7 @@ export const addToCartValidator = [
 
     body("quantity")
         .exists().withMessage("quantity is required").bail()
-        .isInt({min:1, max:20}).withMessage("quantity must be an integer greater than 1"),
+        .isInt({ min: 1, max: 20 }).withMessage("quantity must be an integer greater than 1"),
 
 
     body("size")
@@ -25,9 +25,9 @@ export const addToCartValidator = [
     (req, res, next) => {
         const errors = validationResult(req)
 
-        if(!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             return res.status(400).json({
-                message:"invalid request"
+                message: "invalid request"
             })
         }
 
@@ -35,4 +35,25 @@ export const addToCartValidator = [
 
     }
 
+]
+
+export const actionValidator = [
+
+    body("action")
+        .exists().withMessage("action is required").bail()
+        .trim()
+        .isString().withMessage("action must be a string").bail()
+        .isIn(["increment", "decrement"]).withMessage("action can only either increment or decrement"),
+
+    (req, res, next) => {
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty()) {
+            return res.status(403).json({
+                message: "invalid request"
+            })
+        }
+
+        next()
+    }
 ]

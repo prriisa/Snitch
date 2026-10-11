@@ -51,7 +51,7 @@ export const addToCartController = async (req, res) => {
             );
 
             if (existingItem) {
-                existingItem.quantity += quantity
+                existingItem.quantity = quantity
             }
             else {
                 cart.products.push({
@@ -82,6 +82,94 @@ export const addToCartController = async (req, res) => {
 }
 
 export const fetchAllCartItemsController = async (req, res) => {
+    try {
+        const userData = req.user
+
+        if (!userData) {
+            return res.status(400).json({
+                message: "USER NOT FOUND"
+            })
+        }
+
+        const cart = await cartModel.findOne({ user: userData.id }).populate("products.product")
+
+        if (!cart) {
+            return res.status(404).json({
+                message: "cart not found"
+            })
+        }
+
+        if (cart.products.length === 0) {
+            return res.status(200).json({
+                message: "cart found successfully",
+                data: null
+            })
+        }
+
+        res.status(200).json({
+            message: "cart found successfully",
+            data: {
+                products: cart.products
+            }
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
+}
+
+export const manageQuantityController = async (req, res) => {
+    try {
+        const cartItemId = req.cartItemId
+        const user = req.user
+        const {action} = req.body
+
+        const cart = await cartModel.findOne({ user: user.id }).populate("products.product")
+
+        const cartItem = cart.products.find((p) => p._id.toString() === cartItemId)
+
+        if (action === "increment") {
+            const selectedSize = cartItem.product.sizes.find((s) => s.size === cartItem.size)
+
+            if (!selectedSize || cartItem.quantity >= selectedSize.stock) {
+                return res.status(400).json({
+                    message: "product quantity limit reached"
+                })
+            }
+
+            cartItem.quantity += 1
+        }
+
+        if (action === "decrement") {
+            if (cartItem.quantity > 1) {
+                cartItem.quantity -= 1
+            } else {
+                return res.status(400).json({
+                    message: "cartItem quantity can't be decreased"
+                })
+            }
+        }
+
+        await cart.save()
+
+        res.status(200).json({
+            message: "Cart quantity updated successfully",
+            data: { cart }
+        });
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
+}
+
+export const deleteCartItemController = async (req, res) => {
+
 }
 
 export const updateCartValidator = async (req, res) => {
