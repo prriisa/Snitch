@@ -10,6 +10,7 @@ cartRoute.post("/add", authenticate, addToCartValidator, addToCartController)
 
 cartRoute.patch("/quantity/:cartItemId", authenticate, actionValidator, cartItemIdValidator, manageQuantityController)
 
+cartRoute.delete("/:cartItemId/delete", authenticate, cartItemIdValidator, deleteCartItemController)
 
 cartRoute.get("/", authenticate, fetchAllCartItemsController)
 

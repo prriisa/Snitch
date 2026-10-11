@@ -125,7 +125,7 @@ export const manageQuantityController = async (req, res) => {
     try {
         const cartItemId = req.cartItemId
         const user = req.user
-        const {action} = req.body
+        const { action } = req.body
 
         const cart = await cartModel.findOne({ user: user.id }).populate("products.product")
 
@@ -170,6 +170,28 @@ export const manageQuantityController = async (req, res) => {
 
 export const deleteCartItemController = async (req, res) => {
 
+    const cartItemId = req.cartItemId
+    const user = req.user
+
+    try {
+        const cart = await cartModel.findOne({ user: user.id }).populate("products.product")
+
+        cart.products = cart.products.filter((p) => p._id.toString() !== cartItemId)
+
+        await cart.save()
+
+        res.status(200).json({
+            message: "product removed from cart success fully",
+            data:{cart}
+        })
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
 }
 
 export const updateCartValidator = async (req, res) => {
