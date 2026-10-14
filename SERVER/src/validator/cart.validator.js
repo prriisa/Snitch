@@ -57,3 +57,24 @@ export const actionValidator = [
         next()
     }
 ]
+
+export const sizeValidator = [
+    body("size")
+        .exists().withMessage("size is required").bail()
+        .isString().withMessage("size must be a string type").bail()
+        .trim()
+        .isIn(["Free Size", "XS", "S", "M", "L", "XL", "XXL", "XXXL"]).withMessage("sizes only can be xs, s, l, xl, xxl, xxxl, free size"),
+
+
+    (req, res, next) => {
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "invalid request"
+            })
+        }
+
+        next()
+    }
+]

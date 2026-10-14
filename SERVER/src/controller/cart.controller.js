@@ -182,7 +182,7 @@ export const deleteCartItemController = async (req, res) => {
 
         res.status(200).json({
             message: "product removed from cart success fully",
-            data:{cart}
+            data: { cart }
         })
 
 
@@ -194,6 +194,43 @@ export const deleteCartItemController = async (req, res) => {
     }
 }
 
-export const updateCartValidator = async (req, res) => {
+export const manageSizeController = async (req, res) => {
+    try {
+        const cartItemId = req.cartItemId
+        const user = req.user
+        const { size } = req.body
+
+        const cart = await cartModel.findOne({ user: user.id }).populate("products.product")
+
+        const cartItem = cart.products.find((p) => p._id.toString() === cartItemId)
+
+        const selectedSize = cartItem.product.sizes.find((s) => s.size === size)
+
+        if(!selectedSize){
+            return res.status(400).json({
+                message:"product size not available"
+            })
+        }
+
+        cartItem.size = size
+
+        if(selectedSize.stock < cartItem.quantity){
+
+            cartItem.quantity = selectedSize.stock
+        }
+        
+        await cart.save()
+
+        res.status(200).json({
+            message: "Cart size updated successfully",
+            data: { cart }
+        });
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
 
 }

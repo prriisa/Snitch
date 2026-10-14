@@ -1,26 +1,21 @@
 import { Router } from "express";
 import authenticate from "../middleware/auth.middleware.js";
-import { addToCartController, fetchAllCartItemsController, updateCartValidator, deleteCartItemController, manageQuantityController } from "../controller/cart.controller.js";
-import { actionValidator, addToCartValidator } from "../validator/cart.validator.js";
-import { cartItemIdValidator } from "../middleware/cart.middleware.js";
+import { addToCartController, fetchAllCartItemsController, deleteCartItemController, manageQuantityController, manageSizeController } from "../controller/cart.controller.js";
+import { actionValidator, addToCartValidator, sizeValidator } from "../validator/cart.validator.js";
+import { cartItemMiddleware } from "../middleware/cart.middleware.js";
 
 const cartRoute = Router()
 
 cartRoute.post("/add", authenticate, addToCartValidator, addToCartController)
 
-cartRoute.patch("/quantity/:cartItemId", authenticate, actionValidator, cartItemIdValidator, manageQuantityController)
+cartRoute.patch("/quantity/:cartItemId/update", authenticate, actionValidator, cartItemMiddleware, manageQuantityController)
 
-cartRoute.delete("/:cartItemId/delete", authenticate, cartItemIdValidator, deleteCartItemController)
+cartRoute.patch("/size/:cartItemId/update", authenticate, sizeValidator, cartItemMiddleware, manageSizeController)
+
+cartRoute.delete("/:cartItemId/delete", authenticate, cartItemMiddleware, deleteCartItemController)
 
 cartRoute.get("/", authenticate, fetchAllCartItemsController)
 
-cartRoute.post("/:id/update", authenticate, addToCartValidator,
-    (req, res, next) => {
-        const { id } = req.params
-
-    },
-    updateCartValidator)
-
-
+/*cartRoute.get("/total", authenticate, totalPriceController)*/
 
 export default cartRoute

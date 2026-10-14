@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import cartModel from "../model/cart.model.js"
 
-export const cartItemIdValidator = async (req, res, next) => {
+export const cartItemMiddleware = async (req, res, next) => {
     const { cartItemId } = req.params
     const user = req.user
 
