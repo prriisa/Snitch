@@ -4,8 +4,7 @@ import cookieParser from "cookie-parser"
 import authRouter from "../router/auth.router.js"
 import cartRoute from "../router/cart.routes.js"
 import cors from "cors"
-
-
+import wishlistRoutes from "../router/wishlist.routes.js"
 
 const app = express()
 
@@ -21,5 +20,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/product", router)
 
 app.use("/api/cart", cartRoute)
+
+app.use("/api/wishlist", wishlistRoutes)
 
 export default app

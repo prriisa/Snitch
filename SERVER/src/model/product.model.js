@@ -15,13 +15,13 @@ const productSchema = new mongoose.Schema({
     },
     images: {
         type: [{
-            url:{
-                type:String,
-                required:true
+            url: {
+                type: String,
+                required: true
             },
-            fileId:{
-                required:true,
-                type:String
+            fileId: {
+                required: true,
+                type: String
             }
         }],
         validate: {
@@ -60,7 +60,7 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "RegisteredUsers"
     }
-})
+}, { timestamps: true })
 
 const productModel = mongoose.model("products", productSchema)
 

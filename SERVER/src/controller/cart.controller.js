@@ -101,7 +101,7 @@ export const fetchAllCartItemsController = async (req, res) => {
 
         if (cart.products.length === 0) {
             return res.status(200).json({
-                message: "cart found successfully",
+                message: "no item in cart",
                 data: null
             })
         }

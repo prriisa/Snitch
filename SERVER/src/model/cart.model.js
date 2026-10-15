@@ -25,7 +25,7 @@ const cartSchema = mongoose.Schema({
         ref: "registeredUsers",
         required: true
     }
-})
+}, { timestamps: true })
 
 const cartModel = mongoose.model("carts", cartSchema)
 
