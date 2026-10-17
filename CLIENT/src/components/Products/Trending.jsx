@@ -1,4 +1,3 @@
-import React from "react";
 
 const categories = ["All", "Shirts", "Jeans", "Sunglasses", "Sweaters", "Trousers", "T-Shirts", "Shoes", "Jackets", "Perfumes"];
 
