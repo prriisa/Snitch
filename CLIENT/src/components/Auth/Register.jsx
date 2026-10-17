@@ -4,7 +4,7 @@ import { useState } from "react";
 import imgDesktop from "../../assets/register-Img.avif";
 import imgMobile from "../../assets/register-Img2.avif";
 import { useForm } from "react-hook-form";
-import { registerUser } from "../../api/api";
+import { registerUser } from "../../api/authApi";
 import { useDispatch } from "react-redux";
 import { setToast } from "../../redux/Slice/toastSlice";
 

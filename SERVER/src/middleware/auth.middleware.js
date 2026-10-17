@@ -2,7 +2,7 @@ import { readAccessToken } from "../utils/auth.utils.js"
 
 const authenticate = (req, res, next) => {
 
-    const accessToken = req.headers.authorization
+    const accessToken = req.headers.authorization?.split(" ")[1]
 
     if (!accessToken) {
         return res.status(400).json({

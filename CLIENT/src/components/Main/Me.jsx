@@ -84,7 +84,7 @@ const Me = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white text-black md:min-h-fit">
+    <div className="pt-25 min-h-screen w-full bg-white text-black md:min-h-fit">
       <div className="bg-white pb-20 md:mx-auto md:max-w-[1200px] md:px-0 md:pb-0">
         {/* Hero */}
         <div className="relative w-full">

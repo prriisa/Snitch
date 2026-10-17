@@ -4,7 +4,7 @@ import imgDesktop from "../../assets/login-Img.avif";
 import imgMobile from "../../assets/login-Img2.avif";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { loginUser } from "../../api/api";
+import { loginUser } from "../../api/authApi";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "../../redux/Slice/toastSlice";
 import { authenticate } from "../../redux/Slice/authSlice";

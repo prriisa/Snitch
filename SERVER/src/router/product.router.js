@@ -7,11 +7,7 @@ import { Router } from "express"
 
 const router = Router()
 
-router.post(
-
-    // created url `/create` for listing product
-
-    "/create",
+router.post(    "/create",
 
     // authenticate user with tokens
 
@@ -52,8 +48,6 @@ router.post(
 
     createNewProductController)
 
-
-
 router.get("/", fetchAllProductController)
 
 router.get("/:id", idValidator, fetchSingleProductController)
@@ -68,7 +62,7 @@ router.delete("/:id/delete",
 
     deleteProductController)
 
-router.post("/:id/update",
+router.patch("/:id/update",
     idValidator,
 
     authenticate,

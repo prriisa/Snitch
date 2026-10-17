@@ -19,7 +19,7 @@ const Navbar = () => {
                 </NavLink>
 
                 {/* Logo */}
-                <div className="flex shrink-0 items-center justify-center">
+                <NavLink to="/" className="flex shrink-0 items-center justify-center">
                     <button type="button" aria-label="Snitch home" className="flex items-center justify-center">
                         <svg viewBox="0 0 2629 518" fill="none" className="h-[24px] w-[80px] md:h-[34px] md:w-[120px]">
                             <g fill="#000" clipPath="url(#clip)">
@@ -32,7 +32,7 @@ const Navbar = () => {
                             </defs>
                         </svg>
                     </button>
-                </div>
+                </NavLink>
 
                 {/* Right */}
                 <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
@@ -43,13 +43,6 @@ const Navbar = () => {
                             <path d="m26.25 26.25-5.425-5.425m2.925-7.075c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10 10 4.477 10 10Z" stroke="#000" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
-
-                    {/* Create Product */}
-                    <NavLink to="/products/create">
-                        <button type="button" aria-label="Search" className="flex items-center justify-center">
-                            <h1 className="h-5 w-5 text-xl md:h-7 md:w-7">+</h1>
-                        </button>
-                    </NavLink>
 
                     {/* Bag */}
                     <NavLink to="/cart">

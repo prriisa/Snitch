@@ -10,10 +10,9 @@ import ShopPage from "../pages/ShopPage";
 import SingleProductPage from "../pages/SingleProductPage";
 import Me from "../components/Main/Me";
 import PrivateRoute from "./PrivateRoute";
-import { refreshTokens } from "../api/api";
+import { refreshTokens } from "../api/authApi";
 import { useDispatch } from "react-redux";
 import { useEffect, useRef } from "react";
-import axiosInstance from "../api/axiosInstance";
 import { authenticate } from "../redux/Slice/authSlice";
 
 const router = createBrowserRouter([
