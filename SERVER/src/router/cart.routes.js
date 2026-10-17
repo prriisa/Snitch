@@ -1,6 +1,6 @@
 import { Router } from "express";
 import authenticate from "../middleware/auth.middleware.js";
-import { addToCartController, fetchAllCartItemsController, deleteCartItemController, manageQuantityController, manageSizeController } from "../controller/cart.controller.js";
+import { addToCartController, fetchAllCartItemsController, deleteCartItemController, manageQuantityController, manageSizeController, totalPriceController } from "../controller/cart.controller.js";
 import { actionValidator, addToCartValidator, sizeValidator } from "../validator/cart.validator.js";
 import { cartItemMiddleware } from "../middleware/cart.middleware.js";
 
@@ -16,6 +16,6 @@ cartRoute.delete("/:cartItemId/delete", authenticate, cartItemMiddleware, delete
 
 cartRoute.get("/", authenticate, fetchAllCartItemsController)
 
-/*cartRoute.get("/total", authenticate, totalPriceController)*/
+cartRoute.get("/total", authenticate, totalPriceController)
 
 export default cartRoute

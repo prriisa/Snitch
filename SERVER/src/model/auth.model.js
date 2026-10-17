@@ -28,7 +28,7 @@ const RegisterSchema = new mongoose.Schema({
         type: String,
         default: null
     }
-})
+},{timestamps:true})
 
 const RegisterModel = mongoose.model("registeredUsers", RegisterSchema)
 

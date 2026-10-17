@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import cartModel from "../model/cart.model.js"
 import productModel from "../model/product.model.js"
 
@@ -206,19 +207,19 @@ export const manageSizeController = async (req, res) => {
 
         const selectedSize = cartItem.product.sizes.find((s) => s.size === size)
 
-        if(!selectedSize){
+        if (!selectedSize) {
             return res.status(400).json({
-                message:"product size not available"
+                message: "product size not available"
             })
         }
 
         cartItem.size = size
 
-        if(selectedSize.stock < cartItem.quantity){
+        if (selectedSize.stock < cartItem.quantity) {
 
             cartItem.quantity = selectedSize.stock
         }
-        
+
         await cart.save()
 
         res.status(200).json({
@@ -233,4 +234,55 @@ export const manageSizeController = async (req, res) => {
         })
     }
 
+}
+
+export const totalPriceController = async (req, res) => {
+    try {
+
+        const result = await cartModel.aggregate([
+            {
+                '$match': {
+                    'user': new mongoose.Types.ObjectId(req.user.id)
+                }
+            }, {
+                '$unwind': {
+                    'path': '$products'
+                }
+            }, {
+                '$lookup': {
+                    'from': 'products',
+                    'localField': 'products.product',
+                    'foreignField': '_id',
+                    'as': 'productDetails'
+                }
+            }, {
+                '$unwind': '$productDetails'
+            }, {
+                '$group': {
+                    '_id': '$_id',
+                    'total': {
+                        '$sum': {
+                            '$multiply': [
+                                '$products.quantity', '$productDetails.price.amount'
+                            ]
+                        }
+                    }
+                }
+            }
+        ])
+
+        return res.status(200).json({
+            message: "Cart total fetched successfully",
+            data: {
+                grandTotal: result[0]?.total ?? 0
+            }
+        })
+
+    } catch (error) {
+        console.log(error)
+
+        return res.status(500).json({
+            message: "Internal server error"
+        })
+    }
 }
