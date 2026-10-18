@@ -185,33 +185,35 @@ export const getMe = async (req, res) => {
 }
 
 export const logOutController = async (req, res) => {
-    try {
-        const userData = req.user
+  try {
+    const userData = req.user
 
-        if (!userData.id) {
-            return res.status(400).json({
-                message: "invalid token payload"
-            })
-        }
-
-        let dbUser = await RegisterModel.findById(userData.id)
-
-        if (!dbUser) {
-            return res.status(404).json({
-                message: "404 user not found"
-            })
-        }
-
-        res.clearCookie("refreshToken", { httpOnly: true })
-
-        res.status(200).json({
-            message: "user logged out successfully"
-        })
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: "internal server error"
-        })
+    if (!userData?.id) {
+      return res.status(400).json({
+        message: "Invalid token payload"
+      })
     }
+
+    const dbUser = await RegisterModel.findById(userData.id)
+
+    if (!dbUser) {
+      return res.status(404).json({
+        message: "User not found"
+      })
+    }
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+    })
+
+    return res.status(200).json({
+      message: "User logged out successfully"
+    })
+  } catch (error) {
+    console.error("Logout error:", error)
+
+    return res.status(500).json({
+      message: "Internal server error"
+    })
+  }
 }

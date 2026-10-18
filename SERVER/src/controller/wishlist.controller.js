@@ -138,3 +138,14 @@ export const removeFromWishlistController = async (req, res) => {
         })
     }
 }
+
+export const checkWishlistController = async (req, res) => {
+    try {
+        const wishlist = await wishlistModel.findOne({ user: req.user.id })
+        const exists = wishlist?.products.some((id) => id.toString() === req.params.id) || false
+
+        res.status(200).json({ exists })
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" })
+    }
+}
