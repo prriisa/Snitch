@@ -14,6 +14,7 @@ import { refreshTokens } from "../api/authApi";
 import { useDispatch } from "react-redux";
 import { useEffect, useRef } from "react";
 import { authenticate } from "../redux/Slice/authSlice";
+import PublicRoute from "./PublicRoute";
 
 const router = createBrowserRouter([
   {
@@ -38,13 +39,18 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "",
-    element: <AuthLayout />,
+    element: <PublicRoute />,
     children: [
-      { path: "login", element: <Login /> },
-      { path: "/register", element: <Register /> }
-    ],
-  },
+      {
+        path: "",
+        element: <AuthLayout />,
+        children: [
+          { path: "login", element: <Login /> },
+          { path: "/register", element: <Register /> }
+        ],
+      },
+    ]
+  }
 
 ]);
 
