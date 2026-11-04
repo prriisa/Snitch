@@ -1,6 +1,7 @@
 import axios from "axios"
 import { refreshTokens } from "./authApi"
 import { store } from "../redux/store"
+import { unAuthorize, updateAccessToken } from "../redux/Slice/authSlice"
 
 const axiosInstance = axios.create({
     baseURL: "http://localhost:3000/api",
