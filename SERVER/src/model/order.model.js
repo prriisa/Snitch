@@ -1,6 +1,12 @@
 import mongoose from "mongoose"
 
 const orderSchema = mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "registeredUsers",
+        required: true
+    },
+
     product: [
         {
             product: {
@@ -53,10 +59,30 @@ const orderSchema = mongoose.Schema({
         }
     },
 
+    subtotalAmount: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    platformFee: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    deliveryFee: {
+        type: Number,
+        required: true,
+        min: 0
+    },
     totalAmount: {
         type: Number,
         required: true,
         min: 0
+    },
+    currency: {
+        type: String,
+        enum: ["INR", "USD"],
+        required: true
     },
 
     paymentMethod: {
@@ -73,8 +99,8 @@ const orderSchema = mongoose.Schema({
 
     orderStatus: {
         type: String,
-        enum: ["PLACED", "CANCELLED", "RETURNED"],
-        default: "PLACED"
+        enum: ["PLACED", "CONFIRMED", "CANCELLED", "RETURNED"],
+        default: "CONFIRMED"
     },
 
     deliveredAt: {
@@ -83,6 +109,6 @@ const orderSchema = mongoose.Schema({
     },
 }, { timestamps: true })
 
-const orderModel = mongoose.model(orderSchema)
+const orderModel = mongoose.model("orders", orderSchema)
 
 export default orderModel

@@ -34,10 +34,13 @@ router.post(    "/create",
     // parsing the json data of price and sizes
 
     (req, res, next) => {
-        req.body.price = JSON.parse(req.body.price)
-        req.body.sizes = JSON.parse(req.body.sizes)
-
-        next()
+        try {
+            req.body.price = JSON.parse(req.body.price)
+            req.body.sizes = JSON.parse(req.body.sizes)
+            next()
+        } catch {
+            return res.status(400).json({ message: "Invalid price or sizes format" })
+        }
     },
 
     // product validator which validates the input fields
@@ -75,7 +78,7 @@ router.patch("/:id/update",
         try {
             req.body.price = JSON.parse(req.body.price)
             req.body.sizes = JSON.parse(req.body.sizes)
-
+            req.body.images = JSON.parse(req.body.images)
             next()
         } catch (error) {
             return res.status(400).json({

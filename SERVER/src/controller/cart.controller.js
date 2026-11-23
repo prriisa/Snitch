@@ -23,15 +23,17 @@ export const addToCartController = async (req, res) => {
             })
         }
 
-        let stockAvailable = selectedSize.stock
+        let cart = await cartModel.findOne({ user: req.user.id })
+        const existingItem = cart?.products.find(
+            (item) => item.product.toString() === product && item.size === size
+        )
+        const updatedQuantity = (existingItem?.quantity || 0) + quantity
 
-        if (stockAvailable < quantity) {
+        if (selectedSize.stock < updatedQuantity) {
             return res.status(400).json({
                 message: "available stock is less"
             })
         }
-
-        let cart = await cartModel.findOne({ user: req.user.id })
 
 
         if (!cart) {
@@ -45,14 +47,8 @@ export const addToCartController = async (req, res) => {
             })
         }
         else {
-            const existingItem = cart.products.find(
-                (item) =>
-                    item.product.toString() === product &&
-                    item.size === size
-            );
-
             if (existingItem) {
-                existingItem.quantity = quantity
+                existingItem.quantity = updatedQuantity
             }
             else {
                 cart.products.push({

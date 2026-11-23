@@ -2,14 +2,14 @@ import productModel from "../model/product.model.js"
 import uploadFiles, { DeleteFiles } from "../services/storage.service.js"
 
 export const createNewProductController = async (req, res) => {
+    const uploadedImgs = []
     try {
         const { title, description, price, sizes } = req.body
-        let files = req.files
-        let imgUrls = []
+        const files = req.files || []
 
         for (let i = 0; i < files.length; i++) {
             const response = await uploadFiles(files[i].buffer, files[i].originalname)
-            imgUrls.push({ url: response.url, fileId: response.fileId })
+            uploadedImgs.push({ url: response.url, fileId: response.fileId })
         }
 
         const product = await productModel.create({
@@ -17,7 +17,7 @@ export const createNewProductController = async (req, res) => {
             description,
             price,
             sizes,
-            images: imgUrls,
+            images: uploadedImgs,
             seller: req.user.id
         })
 
@@ -28,7 +28,7 @@ export const createNewProductController = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error);
+        console.error(error)
 
         for (const image of uploadedImgs) {
             try {
@@ -120,6 +120,7 @@ export const deleteProductController = async (req, res) => {
 }
 
 export const updateProductController = async (req, res) => {
+    const uploadedImgs = []
     try {
         const product = await productModel.findById(req.productId)
 
@@ -132,7 +133,7 @@ export const updateProductController = async (req, res) => {
         const { title, description, price, sizes, images } = req.body
         const newImages = req.files || []
 
-        const parsedImages = JSON.parse(images)
+        const parsedImages = Array.isArray(images) ? images : JSON.parse(images)
 
         if (parsedImages.length > 5) {
             return res.status(400).json({
@@ -167,8 +168,6 @@ export const updateProductController = async (req, res) => {
                 message: "A product can have at most 5 images",
             });
         }
-
-        const uploadedImgs = []
 
         for (let img of newImages) {
             let response = await uploadFiles(img.buffer, img.originalname)
@@ -206,7 +205,7 @@ export const updateProductController = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error);
+        console.error(error)
 
         for (const image of uploadedImgs) {
             try {

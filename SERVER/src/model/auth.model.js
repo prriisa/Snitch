@@ -24,6 +24,54 @@ const RegisterSchema = new mongoose.Schema({
             message: "{values} is not a valid role"
         }
     },
+    savedAddresses: [{
+        label: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 30
+        },
+        fullName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 100
+        },
+        phone: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 20
+        },
+        address: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 200
+        },
+        city: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 80
+        },
+        state: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 80
+        },
+        pincode: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 12
+        },
+        isDefault: {
+            type: Boolean,
+            default: false
+        }
+    }],
     refreshToken: {
         type: String,
         default: null

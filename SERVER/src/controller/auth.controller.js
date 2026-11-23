@@ -1,6 +1,45 @@
 import RegisterModel from "../model/auth.model.js"
+import mongoose from "mongoose"
 import bcrypt from "bcryptjs"
 import { createAccessToken, createRefreshToken, readRefreshToken } from "../utils/auth.utils.js"
+
+const addressFields = ["fullName", "phone", "address", "city", "state", "pincode"]
+const addressFieldLimits = {
+    fullName: 100,
+    phone: 20,
+    address: 200,
+    city: 80,
+    state: 80,
+    pincode: 12
+}
+
+const validateSavedAddress = (input = {}) => {
+    const address = {}
+    for (const field of addressFields) {
+        if (typeof input[field] !== "string" || !input[field].trim() || input[field].trim().length > addressFieldLimits[field]) {
+            return { error: `Enter a valid ${field}.` }
+        }
+        address[field] = input[field].trim()
+    }
+
+    const label = typeof input.label === "string" && input.label.trim() ? input.label.trim() : "Home"
+    if (label.length > 30) return { error: "Address label must be 30 characters or fewer." }
+
+    return {
+        address: {
+            ...address,
+            label,
+            isDefault: input.isDefault === true
+        }
+    }
+}
+
+const refreshCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/"
+}
 
 export const registerUserController = async (req, res) => {
     try {
@@ -25,14 +64,16 @@ export const registerUserController = async (req, res) => {
 
         await RegisterModel.findByIdAndUpdate(userData._id, { refreshToken })
 
-        res.cookie("refreshToken", refreshToken, { httpOnly: true })
+        res.cookie("refreshToken", refreshToken, refreshCookieOptions)
 
         res.status(201).json({
             message: "user registered successfully",
             data: {
                 userData: {
+                    id: userData._id,
                     name: userData.name,
-                    email: userData.email
+                    email: userData.email,
+                    role: userData.role
                 },
                 accessToken,
             }
@@ -73,14 +114,16 @@ export const loginUserController = async (req, res) => {
 
         await RegisterModel.findByIdAndUpdate(isRegistered._id, { refreshToken })
 
-        res.cookie("refreshToken", refreshToken, { httpOnly: true })
+        res.cookie("refreshToken", refreshToken, refreshCookieOptions)
 
         res.status(200).json({
             message: "user logged in successfully",
             data: {
                 userData: {
+                    id: isRegistered._id,
                     name: isRegistered.name,
-                    email: isRegistered.email
+                    email: isRegistered.email,
+                    role: isRegistered.role
                 },
                 accessToken
             }
@@ -101,7 +144,7 @@ export const refreshTokenController = async (req, res) => {
         let { refreshToken } = req.cookies
 
         if (!refreshToken) {
-            return res.status(400).json({
+            return res.status(401).json({
                 message: "Refresh Token not found"
             })
         }
@@ -110,10 +153,8 @@ export const refreshTokenController = async (req, res) => {
 
         const userData = await RegisterModel.findById(decodedData.id)
 
-        if (userData.refreshToken !== refreshToken) {
-            await RegisterModel.findByIdAndUpdate(userData._id, { refreshToken: null })
-
-            return res.status(400).json({
+        if (!userData || userData.refreshToken !== refreshToken) {
+            return res.status(401).json({
                 message: "incorrect Refresh Token"
             })
         }
@@ -123,24 +164,27 @@ export const refreshTokenController = async (req, res) => {
 
         await RegisterModel.findByIdAndUpdate(userData._id, { refreshToken: newRefreshToken })
 
-        res.cookie("refreshToken", newRefreshToken, { httpOnly: true })
+        res.cookie("refreshToken", newRefreshToken, refreshCookieOptions)
 
         res.status(200).json({
             message: "new Token Generated Successfully",
             data: {
                 userData: {
+                    id: userData._id,
                     name: userData.name,
-                    email: userData.email
+                    email: userData.email,
+                    role: userData.role
                 },
                 accessToken
             }
         })
 
     } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: "internal server error"
-        })
+        if (["TokenExpiredError", "JsonWebTokenError", "NotBeforeError"].includes(error.name)) {
+            return res.status(401).json({ message: "Refresh token expired or invalid" })
+        }
+        console.error(error)
+        return res.status(500).json({ message: "internal server error" })
     }
 
 }
@@ -184,6 +228,159 @@ export const getMe = async (req, res) => {
     }
 }
 
+export const updateMyProfileController = async (req, res) => {
+    const name = typeof req.body?.name === "string" ? req.body.name.trim() : ""
+    if (name.length < 3 || name.length > 100) {
+        return res.status(400).json({ message: "Name must be between 3 and 100 characters." })
+    }
+
+    try {
+        const user = await RegisterModel.findByIdAndUpdate(
+            req.user.id,
+            { $set: { name } },
+            { new: true, runValidators: true }
+        ).select("_id name email role")
+
+        if (!user) return res.status(404).json({ message: "User not found." })
+
+        return res.status(200).json({
+            message: "Personal information updated successfully.",
+            data: {
+                userData: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role
+                }
+            }
+        })
+    } catch (error) {
+        console.error("Could not update personal information:", error)
+        return res.status(500).json({ message: "Could not update personal information." })
+    }
+}
+
+export const fetchSavedAddressesController = async (req, res) => {
+    try {
+        const user = await RegisterModel.findById(req.user.id).select("savedAddresses")
+        if (!user) return res.status(404).json({ message: "User not found." })
+
+        return res.status(200).json({
+            message: "Saved addresses fetched successfully.",
+            data: { addresses: user.savedAddresses }
+        })
+    } catch (error) {
+        console.error("Could not fetch saved addresses:", error)
+        return res.status(500).json({ message: "Could not load saved addresses." })
+    }
+}
+
+export const createSavedAddressController = async (req, res) => {
+    const { address, error } = validateSavedAddress(req.body)
+    if (error) return res.status(400).json({ message: error })
+
+    try {
+        const user = await RegisterModel.findById(req.user.id).select("savedAddresses")
+        if (!user) return res.status(404).json({ message: "User not found." })
+
+        address.isDefault = address.isDefault || user.savedAddresses.length === 0
+        if (address.isDefault) user.savedAddresses.forEach((savedAddress) => { savedAddress.isDefault = false })
+        user.savedAddresses.push(address)
+        await user.save()
+
+        return res.status(201).json({
+            message: "Address saved successfully.",
+            data: { addresses: user.savedAddresses }
+        })
+    } catch (saveError) {
+        console.error("Could not save address:", saveError)
+        return res.status(500).json({ message: "Could not save this address." })
+    }
+}
+
+export const updateSavedAddressController = async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.addressId)) {
+        return res.status(400).json({ message: "Invalid address id." })
+    }
+
+    const { address, error } = validateSavedAddress(req.body)
+    if (error) return res.status(400).json({ message: error })
+
+    try {
+        const user = await RegisterModel.findById(req.user.id).select("savedAddresses")
+        if (!user) return res.status(404).json({ message: "User not found." })
+
+        const savedAddress = user.savedAddresses.id(req.params.addressId)
+        if (!savedAddress) return res.status(404).json({ message: "Address not found." })
+
+        const wasDefault = savedAddress.isDefault
+        if (address.isDefault) user.savedAddresses.forEach((item) => { item.isDefault = false })
+        Object.assign(savedAddress, address)
+        if (wasDefault && !address.isDefault && user.savedAddresses.length > 1) {
+            user.savedAddresses.find((item) => !item._id.equals(savedAddress._id)).isDefault = true
+        }
+        await user.save()
+
+        return res.status(200).json({
+            message: "Address updated successfully.",
+            data: { addresses: user.savedAddresses }
+        })
+    } catch (saveError) {
+        console.error("Could not update saved address:", saveError)
+        return res.status(500).json({ message: "Could not update this address." })
+    }
+}
+
+export const deleteSavedAddressController = async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.addressId)) {
+        return res.status(400).json({ message: "Invalid address id." })
+    }
+
+    try {
+        const user = await RegisterModel.findById(req.user.id).select("savedAddresses")
+        if (!user) return res.status(404).json({ message: "User not found." })
+
+        const address = user.savedAddresses.id(req.params.addressId)
+        if (!address) return res.status(404).json({ message: "Address not found." })
+        const wasDefault = address.isDefault
+        user.savedAddresses.pull(req.params.addressId)
+        if (wasDefault && user.savedAddresses.length) user.savedAddresses[0].isDefault = true
+        await user.save()
+
+        return res.status(200).json({
+            message: "Address deleted successfully.",
+            data: { addresses: user.savedAddresses }
+        })
+    } catch (error) {
+        console.error("Could not delete saved address:", error)
+        return res.status(500).json({ message: "Could not delete this address." })
+    }
+}
+
+export const setDefaultSavedAddressController = async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.addressId)) {
+        return res.status(400).json({ message: "Invalid address id." })
+    }
+
+    try {
+        const user = await RegisterModel.findById(req.user.id).select("savedAddresses")
+        if (!user) return res.status(404).json({ message: "User not found." })
+
+        const address = user.savedAddresses.id(req.params.addressId)
+        if (!address) return res.status(404).json({ message: "Address not found." })
+        user.savedAddresses.forEach((item) => { item.isDefault = item._id.equals(address._id) })
+        await user.save()
+
+        return res.status(200).json({
+            message: "Default address updated successfully.",
+            data: { addresses: user.savedAddresses }
+        })
+    } catch (error) {
+        console.error("Could not set the default address:", error)
+        return res.status(500).json({ message: "Could not update the default address." })
+    }
+}
+
 export const logOutController = async (req, res) => {
   try {
     const userData = req.user
@@ -202,9 +399,8 @@ export const logOutController = async (req, res) => {
       })
     }
 
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-    })
+    await RegisterModel.findByIdAndUpdate(dbUser._id, { refreshToken: null })
+    res.clearCookie("refreshToken", refreshCookieOptions)
 
     return res.status(200).json({
       message: "User logged out successfully"
