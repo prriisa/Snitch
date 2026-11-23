@@ -1,160 +1,192 @@
+# Snitch – E-Commerce Platform
 
-# SNITCH — Full-Stack E-commerce Platform
+Snitch is a full-stack e-commerce application designed to provide a smooth online shopping experience with product browsing, cart management, wishlist functionality, and seller-side product management.
 
-A modern full-stack e-commerce web application inspired by SNITCH, built to deliver a smooth online shopping experience with product browsing, authentication, cart management, and wishlist functionality.
+The platform follows a **single-seller model**, meaning there is only one seller who manages the store. Customers can explore products and shop through the application, while the seller has access to the seller dashboard and all available seller functionalities.
 
-## 🚀 Features
+## ✨ Features
 
-### 🛍️ Shopping Experience
-- Browse products with a clean, responsive UI.
-- Explore trending categories and shop by price.
-- View detailed product information.
-- Select product sizes and check stock availability.
-- Add products to the cart and wishlist.
+### 🛍️ Customer Features
 
-### 🔐 Authentication
-- User registration and login.
-- JWT-based authentication.
-- Access token and refresh token handling.
-- Protected routes and role-based authorization.
+- **Product Browsing:** Explore the products available in the store.
+- **Product Details:** View detailed information about individual products.
+- **Shopping Cart:** Add products to the cart and manage cart items.
+- **Wishlist:** Save favourite products for later.
+- **Authentication:** Secure login and registration functionality.
+- **Responsive UI:** Enjoy the application across different screen sizes.
 
-### 🛒 Cart Management
-- Add products to the cart with selected sizes.
-- Automatically increase quantity for duplicate products of the same size.
-- Add the same product in different sizes as separate cart items.
-- Update product quantities.
-- Validate stock availability.
-- Remove items and calculate the cart total.
+### 👨‍💼 Seller Features
 
-### ❤️ Wishlist
-- Manage your wishlist.
-- Keep track of products you want to purchase.
+Snitch follows a single-seller architecture. There are no multiple seller registrations or separate seller accounts.
 
-### ⚙️ Backend & Product Management
-- RESTful APIs using Express.js.
-- MongoDB database integration.
-- Product and user management.
-- Image uploads using ImageKit.
-- Request validation and error handling.
+The application has one dedicated seller account. Once logged in with the seller credentials, you can access all the seller-side features available in the application.
 
-### 📱 Responsive UI
-- Mobile-first layout.
-- Responsive product grids.
-- Smooth navigation and interactive UI components.
+Depending on the implemented functionality, these include:
 
-## 🧰 Tech Stack
+- Accessing the seller dashboard.
+- Managing store products.
+- Adding new products.
+- Updating existing product information.
+- Managing product listings.
+- Accessing seller-specific functionality.
+
+**Note:** The seller account has access to all seller features; customers do not need a separate seller registration.
+
+## 🔐 Seller Login Credentials
+
+Use the following demo credentials to access the seller side of the application:
+
+| Field | Credentials |
+|---|---|
+| Account Type | Seller |
+| Email | `priya@gmail.com` |
+| Password | `Test001@` |
+
+**How to access seller features:**
+
+1. Open the Snitch application.
+2. Navigate to the Login page.
+3. Enter the seller email address.
+4. Enter the seller password.
+5. Log in to access the seller-side features.
+
+> **Important:** These are demo credentials. Do not use real or sensitive account credentials in a publicly accessible repository.
+
+## 🧑‍💻 Technology Stack
 
 ### Frontend
 - React.js
 - React Router
-- Tailwind CSS
 - Redux Toolkit
+- Tailwind CSS
 - Axios
-- React Hook Form
-- Lucide React
 
 ### Backend
 - Node.js
 - Express.js
 - MongoDB
 - Mongoose
-- JSON Web Tokens (JWT)
-- Multer
+- JSON Web Token (JWT)
 - ImageKit
 
 ## 📁 Project Structure
 
+The project is organized into two main directories:
+
 ```text
-SNITCH/
-├── CLIENT/
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── layouts/
-│       ├── redux/
-│       ├── routes/
-│       └── api/
+Snitch/
 │
-└── SERVER/
-    └── src/
-        ├── controllers/
-        ├── routes/
-        ├── model/
-        ├── middleware/
-        ├── validators/
-        └── config/
+├── CLIENT/
+│   └── React frontend application
+│
+├── SERVER/
+│   └── Express backend application
+│
+└── README.md
 ```
 
-*The folder structure may vary depending on the latest project implementation.*
+### CLIENT
 
-## ⚙️ Getting Started
+Contains the frontend application, including the user interface, pages, reusable components, routing, and state management.
+
+### SERVER
+
+Contains the backend application, including API routes, controllers, database models, authentication, and server-side logic.
+
+## ⚙️ Installation and Setup
 
 ### 1. Clone the Repository
 
 ```bash
-git clone YOUR_REPOSITORY_URL
-cd SNITCH
+git clone https://github.com/prriisa/Snitch.git
 ```
 
-### 2. Set Up the Backend
+### 2. Navigate to the Project
+
+```bash
+cd Snitch
+```
+
+### 3. Install Frontend Dependencies
+
+```bash
+cd CLIENT
+npm install
+```
+
+### 4. Install Backend Dependencies
+
+Open another terminal:
 
 ```bash
 cd SERVER
 npm install
 ```
 
-Create a `.env` file inside the `SERVER` directory:
+### 5. Configure Environment Variables
 
-```env
-PORT=3000
-MONGO_URI=your_mongodb_connection_string
-ACCESS_JWT=your_access_token_secret
-REFRESH_JWT=your_refresh_token_secret
-IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
-CLIENT_URL=http://localhost:5173
-```
+Create the required `.env` files for the frontend and backend.
 
-For production, set `NODE_ENV=production` and replace `CLIENT_URL` with the deployed frontend origin. The frontend's Vercel setup is documented in [CLIENT/README.md](CLIENT/README.md).
+Configure the environment variables required by the application, such as:
+
+- MongoDB connection string.
+- JWT secret.
+- ImageKit credentials.
+- Backend API URL.
+
+Use the variable names expected by the existing source code. Never commit real `.env` files or secrets to GitHub.
+
+### 6. Run the Application
 
 Start the backend:
 
 ```bash
+cd SERVER
 npm run dev
 ```
 
-### 3. Set Up the Frontend
-
-Open another terminal:
+Start the frontend in another terminal:
 
 ```bash
 cd CLIENT
-npm install
 npm run dev
 ```
 
-Open the local URL provided by Vite in your terminal.
+The exact commands may vary depending on the scripts defined in each `package.json`.
 
-## 🔒 Environment Variables
+## 🔒 Authentication and Seller Architecture
 
-Never commit your `.env` file or expose your secret keys.
+Snitch uses a single-seller approach.
 
-Add `.env` to `.gitignore` and use environment variables for database credentials, JWT secrets, and third-party service credentials.
+Unlike multi-vendor marketplaces, this application does not allow multiple sellers to register and independently manage their stores.
 
-## 🌱 Future Improvements
+Instead:
 
-- Integrate a secure payment gateway.
-- Add order tracking milestones and additional payment options.
-- Build an admin dashboard for product management.
-- Add product sorting and advanced filtering.
-- Add product reviews and ratings.
-- Improve automated testing and API documentation.
+- There is one seller account.
+- The seller can access all available seller-side functionality.
+- Customers can browse products and use shopping features.
+- Seller functionality is intended to be restricted to the authenticated seller.
 
-## 👨‍💻 Author
+## 🚀 Future Improvements
 
-**Priya**
+Potential enhancements for the application include:
 
-Full-Stack Developer | MERN Stack
+- Order management and order tracking.
+- Payment gateway integration.
+- Improved seller analytics.
+- Product inventory management.
+- Customer reviews and ratings.
+- Enhanced search and filtering.
+- Order notifications.
 
-## 📄 Disclaimer
+## 👩‍💻 Author
 
-This project is developed for educational and portfolio purposes. It is inspired by the SNITCH brand and is not an official SNITCH application.
+**Priya Sharma**
+
+GitHub: [@prriisa](https://github.com/prriisa)
+
+---
+
+⭐ If you find this project interesting, feel free to explore the repository and its implementation.
+
+**Snitch – A Single-Seller E-Commerce Platform.**

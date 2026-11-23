@@ -11,12 +11,11 @@ npm run dev
 
 By default, Vite proxies `/api` requests to `http://127.0.0.1:3000`. Keep the backend `PORT` set to `3000` and restart both development servers after changing the proxy or server port.
 
-## Vercel deployment
+## Vercel multi-service deployment
 
-1. Import the repository into Vercel and set **Root Directory** to `CLIENT`.
-2. Use `npm run build` as the build command and `dist` as the output directory.
-3. Configure `VITE_API_URL` as the public backend API URL, including `/api` (for example, `https://your-api.example.com/api`).
-4. Configure the backend's `CLIENT_URL` to the exact deployed frontend origin (for example, `https://your-store.vercel.app`). For preview deployments, add the preview origin to the comma-separated `CLIENT_URL` list when needed.
-5. Deploy the backend separately with `NODE_ENV=production` and valid database, JWT, and image-storage credentials. The backend must support credentialed CORS and HTTPS so its refresh-token cookie can be used by the client.
+1. Import the repository into Vercel with the repository root as the **Root Directory**. The root `vercel.json` builds the Vite client and Express server as separate services.
+2. The public `/api/*` rewrite sends API requests to the server; other paths go to the client. Client-side routes are rewritten to the Vite entry point.
+3. Configure the server's `MONGO_URI`, `ACCESS_JWT`, `REFRESH_JWT`, and `IMAGEKIT_PRIVATE_KEY` in Vercel's environment settings. Do not commit `.env` files.
+4. The client uses the same-origin `/api` path, so no `VITE_API_URL` is needed for this routing setup.
 
-`vercel.json` rewrites client-side routes to the Vite entry point so direct navigation and refresh work on seller and product routes.
+Vercel Services are currently in beta. The server is a public API service; there are no internal service-to-service calls or bindings in this application.
