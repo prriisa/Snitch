@@ -11,6 +11,10 @@
   font-weight: 700;
 }
 
+*{
+  user-select: none;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -32,6 +36,64 @@ select:-webkit-autofill:focus {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+.order-success-card {
+  animation: order-success-enter 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.order-success-icon {
+  animation: order-success-pop 650ms cubic-bezier(0.2, 0.8, 0.2, 1) 150ms both;
+}
+
+.order-success-progress {
+  animation: order-success-progress 1800ms linear both;
+}
+
+.orders-page-enter {
+  animation: orders-page-enter 350ms ease-out both;
+}
+
+@keyframes orders-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes order-success-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes order-success-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes order-success-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 ::-webkit-scrollbar {

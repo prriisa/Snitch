@@ -11,11 +11,7 @@ const WishListPage = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!user) {
-      setItems([])
-      setIsLoading(false)
-      return
-    }
+    if (!user) return
 
     const loadWishlist = async () => {
       try {
@@ -56,7 +52,7 @@ const WishListPage = () => {
       )}
 
       <div className="w-full md:px-[90px] md:pt-3">
-        <div className="grid grid-cols-2 gap-x-1 gap-y-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 items-start gap-x-1 gap-y-3 md:grid-cols-4">
           {isLoading
             ? Array.from({ length: 4 }, (_, i) => (
                 <WishlistProductCardSkeleton key={i} />

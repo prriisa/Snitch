@@ -1,38 +1,64 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
+import { lazy, Suspense, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
-import Login from "../components/Auth/Login";
-import Register from "../components/Auth/Register";
-import MainPage from "../pages/MainPage";
-import CartPage from "../pages/CartPage";
-import WishListPage from "../pages/WishListPage";
-import ShopPage from "../pages/ShopPage";
-import SingleProductPage from "../pages/SingleProductPage";
-import Me from "../components/Main/Me";
 import PrivateRoute from "./PrivateRoute";
 import { refreshTokens } from "../api/authApi";
-import { useDispatch } from "react-redux";
-import { useEffect, useRef } from "react";
-import { authenticate } from "../redux/Slice/authSlice";
+import { authChecked, authenticate } from "../redux/Slice/authSlice";
 import PublicRoute from "./PublicRoute";
+import SellerRoute from "./SellerRoute";
+
+const Login = lazy(() => import("../components/Auth/Login"));
+const Register = lazy(() => import("../components/Auth/Register"));
+const MainPage = lazy(() => import("../pages/MainPage"));
+const CartPage = lazy(() => import("../pages/CartPage"));
+const WishListPage = lazy(() => import("../pages/WishListPage"));
+const ShopPage = lazy(() => import("../pages/ShopPage"));
+const SingleProductPage = lazy(() => import("../pages/SingleProductPage"));
+const Me = lazy(() => import("../components/Main/Me"));
+const SellerProductsPage = lazy(() => import("../pages/SellerProductsPage"));
+const ProductFormPage = lazy(() => import("../pages/ProductFormPage"));
+const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
+const OrdersPage = lazy(() => import("../pages/OrdersPage"));
+const PersonalInformationPage = lazy(() => import("../pages/PersonalInformationPage"));
+const SavedAddressesPage = lazy(() => import("../pages/SavedAddressesPage"));
+
+const renderPage = (Page) => (
+  <Suspense fallback={<div className="flex min-h-[50vh] items-center justify-center bg-white text-xs uppercase tracking-[0.2em] text-neutral-500">Loading...</div>}>
+    <Page />
+  </Suspense>
+)
 
 const router = createBrowserRouter([
   {
     path: "",
     element: <MainLayout />,
     children: [
-      { index: "/", element: <MainPage /> },
-      { path: "/cart", element: <CartPage /> },
-      { path: "/wishlist", element: <WishListPage /> },
-      { path: "shop", element: <ShopPage /> },
-      { path: "product/:id", element: <SingleProductPage /> },
+      { index: true, element: renderPage(MainPage) },
+      { path: "/cart", element: renderPage(CartPage) },
+      { path: "/wishlist", element: renderPage(WishListPage) },
+      { path: "shop", element: renderPage(ShopPage) },
+      { path: "product/:id", element: renderPage(SingleProductPage) },
 
       // private route
       {
         element: <PrivateRoute />,
         children: [
-          { path: "me", element: <Me />, },
-          { path: "createNewProduct", element: <></> }
+          { path: "me", element: renderPage(Me) },
+          { path: "account/profile", element: renderPage(PersonalInformationPage) },
+          { path: "account/addresses", element: renderPage(SavedAddressesPage) },
+          { path: "checkout", element: renderPage(CheckoutPage) },
+          { path: "orders", element: renderPage(OrdersPage) },
+          { path: "order", element: renderPage(OrdersPage) },
+          {
+            element: <SellerRoute />,
+            children: [
+              { path: "seller/products", element: renderPage(SellerProductsPage) },
+              { path: "seller/create-product", element: renderPage(ProductFormPage) },
+              { path: "seller/products/:id/edit", element: renderPage(ProductFormPage) }
+            ]
+          }
         ],
       },
     ],
@@ -45,8 +71,8 @@ const router = createBrowserRouter([
         path: "",
         element: <AuthLayout />,
         children: [
-          { path: "login", element: <Login /> },
-          { path: "/register", element: <Register /> }
+          { path: "login", element: renderPage(Login) },
+          { path: "register", element: renderPage(Register) }
         ],
       },
     ]
@@ -73,7 +99,11 @@ const AppRoutes = () => {
         }))
 
       } catch (error) {
-        console.log(error)
+        if (error.response?.status !== 401) {
+          console.error("Could not restore the signed-in session:", error.response?.data?.message || error.message)
+        }
+      } finally {
+        dispatch(authChecked())
       }
     }
     restoreSession()

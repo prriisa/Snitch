@@ -1,16 +1,22 @@
-# React + Vite
+# Snitch client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The client is a React application built with Vite. It includes the storefront, customer authentication, and seller product management.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+By default, Vite proxies `/api` requests to `http://127.0.0.1:3000`. Keep the backend `PORT` set to `3000` and restart both development servers after changing the proxy or server port.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Vercel deployment
 
-## Expanding the ESLint configuration
+1. Import the repository into Vercel and set **Root Directory** to `CLIENT`.
+2. Use `npm run build` as the build command and `dist` as the output directory.
+3. Configure `VITE_API_URL` as the public backend API URL, including `/api` (for example, `https://your-api.example.com/api`).
+4. Configure the backend's `CLIENT_URL` to the exact deployed frontend origin (for example, `https://your-store.vercel.app`). For preview deployments, add the preview origin to the comma-separated `CLIENT_URL` list when needed.
+5. Deploy the backend separately with `NODE_ENV=production` and valid database, JWT, and image-storage credentials. The backend must support credentialed CORS and HTTPS so its refresh-token cookie can be used by the client.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+`vercel.json` rewrites client-side routes to the Vite entry point so direct navigation and refresh work on seller and product routes.

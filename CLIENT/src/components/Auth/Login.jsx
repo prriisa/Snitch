@@ -1,11 +1,11 @@
 import { ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useLocation, useNavigate } from "react-router";
 import imgDesktop from "../../assets/login-Img.avif";
 import imgMobile from "../../assets/login-Img2.avif";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { loginUser } from "../../api/authApi";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setToast } from "../../redux/Slice/toastSlice";
 import { authenticate } from "../../redux/Slice/authSlice";
 
@@ -14,61 +14,57 @@ const Login = () => {
   const dispatch = useDispatch()
   const [showPassword, setShowPassword] = useState(false)
   const [loginError, setLoginError] = useState(null)
-  const { handleSubmit, register, formState: { errors }, reset } = useForm({ mode: "onChange" })
+  const { handleSubmit, register, formState: { errors, isSubmitting }, reset } = useForm({ mode: "onChange" })
   const navigate = useNavigate()
+  const location = useLocation()
 
   const onSubmit = async (data) => {
     try {
       let response = await loginUser(data)
-      console.log(response)
       setLoginError(null)
-      navigate("/")
-      dispatch(setToast({
-        success: true,
-        message: response.data.message,
-      }))
       dispatch(authenticate({
         accessToken: response.data.data.accessToken,
-        user : response.data.data.userData
+        user: response.data.data.userData
       }))
+      dispatch(setToast({ success: true, message: response.data.message }))
+      navigate(location.state?.from?.pathname || "/", { replace: true })
       reset()
     } catch (error) {
-      setLoginError(error.response?.data.message)
-      console.log(error.response?.data)
+      setLoginError(error.response?.data?.message || "Unable to log in. Please try again.")
     }
   };
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-black text-white flex flex-col md:h-screen">
 
       {/* Back Arrow */}
-      <div className="flex items-center px-6 py-4">
+      <div className="flex shrink-0 items-center px-6 py-4">
         <NavLink to="/" className="text-neutral-400 hover:text-white transition flex items-center gap-2">
           <ArrowLeft size={22} />
         </NavLink>
       </div>
 
       {/* Main Row */}
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="flex flex-1 flex-col md:min-h-0 md:flex-row">
 
         {/* Left side - image */}
-        <div className="w-full md:w-1/2 h-64 md:h-full flex flex-col">
+        <div className="flex w-full flex-col md:h-full md:min-h-0 md:w-1/2">
 
           {/* Mobile Logo + Heading */}
-          <div className="block md:hidden flex flex-col items-center py-4 space-y-2">
+          <div className="flex flex-col items-center py-4 space-y-2 md:hidden">
             <h1 className="text-3xl font-bold tracking-[0.3em]">SNITCH</h1>
             <h2 className="text-xs tracking-[0.2em] text-neutral-400">LOGIN TO YOUR ACCOUNT</h2>
           </div>
 
           {/* Mobile Image */}
-          <img src={imgMobile} alt="Login Mobile" className="block md:hidden w-full h-full object-cover" />
+          <img src={imgMobile} alt="Login Mobile" className="block h-40 w-full object-cover sm:h-56 md:hidden" />
 
           {/* Desktop Image */}
-          <img src={imgDesktop} alt="Login Desktop" className="hidden md:block w-full h-screen object-cover" />
+          <img src={imgDesktop} alt="Login Desktop" className="hidden min-h-0 w-full flex-1 object-cover md:block" />
         </div>
 
         {/* Right side - form */}
-        <div className="w-full md:w-1/2 flex flex-col h-full px-6 py-6 md:py-10">
+        <div className="flex w-full flex-col px-6 py-6 md:min-h-0 md:w-1/2 md:py-10">
 
           {/* Desktop Logo + Heading */}
           <div className="hidden md:flex flex-col items-center mb-4 md:mb-6 space-y-2">
@@ -77,7 +73,7 @@ const Login = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="flex-grow flex flex-col items-center justify-center">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col items-center justify-center py-4 md:py-0">
             <div className="w-full max-w-md space-y-6 text-center">
 
               {/* Email */}
@@ -137,8 +133,8 @@ const Login = () => {
               </div>
 
               {/* Login Button */}
-              <button type="submit" className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition">
-                Login <ArrowRight size={18} />
+              <button type="submit" disabled={isSubmitting} className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition disabled:cursor-not-allowed disabled:opacity-60">
+                {isSubmitting ? "Signing in..." : "Login"} <ArrowRight size={18} />
               </button>
 
 

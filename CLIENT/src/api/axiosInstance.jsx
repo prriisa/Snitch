@@ -3,9 +3,13 @@ import { refreshTokens } from "./authApi"
 import { store } from "../redux/store"
 import { unAuthorize, updateAccessToken } from "../redux/Slice/authSlice"
 
+const baseURL = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "")
+let refreshRequest
+
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:3000/api",
-    withCredentials: true
+    baseURL,
+    withCredentials: true,
+    timeout: 15000
 })
 
 axiosInstance.interceptors.request.use(
@@ -30,17 +34,24 @@ axiosInstance.interceptors.response.use(
 
         if (
             error.response?.status === 401 &&
+            originalRequest &&
             !originalRequest._retry &&
             !originalRequest.url?.includes("/auth/refresh")
         ) {
             originalRequest._retry = true
 
             try {
-                const response = await refreshTokens()
+                if (!refreshRequest) {
+                    refreshRequest = refreshTokens().finally(() => {
+                        refreshRequest = null
+                    })
+                }
+                const response = await refreshRequest
                 const newAccessToken = response.data.data.accessToken
 
                 store.dispatch(updateAccessToken(newAccessToken))
 
+                originalRequest.headers = originalRequest.headers || {}
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
 
                 return axiosInstance(originalRequest)

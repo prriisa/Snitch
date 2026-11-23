@@ -106,13 +106,15 @@ npm install
 Create a `.env` file inside the `SERVER` directory:
 
 ```env
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-ACCESS_TOKEN_SECRET=your_access_token_secret
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
+PORT=3000
+MONGO_URI=your_mongodb_connection_string
+ACCESS_JWT=your_access_token_secret
+REFRESH_JWT=your_refresh_token_secret
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+CLIENT_URL=http://localhost:5173
 ```
 
-Add any additional environment variables required by your ImageKit configuration.
+For production, set `NODE_ENV=production` and replace `CLIENT_URL` with the deployed frontend origin. The frontend's Vercel setup is documented in [CLIENT/README.md](CLIENT/README.md).
 
 Start the backend:
 
@@ -141,9 +143,9 @@ Add `.env` to `.gitignore` and use environment variables for database credential
 ## 🌱 Future Improvements
 
 - Integrate a secure payment gateway.
-- Add order placement and order tracking.
+- Add order tracking milestones and additional payment options.
 - Build an admin dashboard for product management.
-- Implement product search, sorting, and filtering.
+- Add product sorting and advanced filtering.
 - Add product reviews and ratings.
 - Improve automated testing and API documentation.
 

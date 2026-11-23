@@ -5,7 +5,7 @@ export const fetchCart = () => axiosInstance.get("/cart")
 export const fetchCartTotal = () => axiosInstance.get("/cart/total")
 
 export const addToCart = (productId, size, quantity = 1) =>
-    axiosInstance.post("/cart/add", { productId, size, quantity })
+    axiosInstance.post("/cart/add", { product: productId, size, quantity })
 
 export const updateCartQuantity = (cartItemId, action) =>
     axiosInstance.patch(`/cart/quantity/${cartItemId}/update`, { action })

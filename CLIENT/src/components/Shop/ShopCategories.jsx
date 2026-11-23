@@ -1,4 +1,4 @@
-import React from "react";
+import { useNavigate } from "react-router";
 
 const categories = [
   { name: "ALL", bold: true },
@@ -6,6 +6,7 @@ const categories = [
   { name: "Bestsellers" },
   { name: "OUTERWEAR" },
   { name: "Shirts" },
+  { name: "Tops" },
   { name: "T-Shirts | POLO" },
   { name: "Jeans" },
   { name: "Trousers" },
@@ -30,6 +31,13 @@ const categories = [
 ];
 
 const ShopCategories = () => {
+  const navigate = useNavigate()
+
+  const selectCategory = (category) => {
+    const search = ["ALL", "SHOP ALL"].includes(category.name.toUpperCase()) ? "" : category.name
+    navigate(search ? `/shop?search=${encodeURIComponent(search)}` : "/shop")
+  }
+
   return (
     <div className="flex items-start max-w-[1440px] mx-auto pt-0">
       <nav className="grid grid-cols-1 md:grid-cols-3 gap-x-0 md:gap-x-20 gap-y-0 md:gap-y-6 shrink-0 pt-0 md:pt-[8px] w-full md:w-auto">
@@ -37,6 +45,7 @@ const ShopCategories = () => {
           <button
             key={category.name}
             type="button"
+            onClick={() => selectCategory(category)}
             className="bg-transparent p-0 border-0 flex items-center text-left px-4 py-3 md:px-0 md:py-0 hover:bg-gray-50 md:hover:bg-transparent"
           >
             <span

@@ -1,5 +1,5 @@
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { NavLink, useNavigate, useOutletContext } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { useState } from "react";
 import imgDesktop from "../../assets/register-Img.avif";
 import imgMobile from "../../assets/register-Img2.avif";
@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { registerUser } from "../../api/authApi";
 import { useDispatch } from "react-redux";
 import { setToast } from "../../redux/Slice/toastSlice";
+import { authenticate } from "../../redux/Slice/authSlice";
 
 const Register = () => {
 
@@ -16,33 +17,34 @@ const Register = () => {
   const [registerError, setRegisterError] = useState(null)
   const navigate = useNavigate()
  
-  const { handleSubmit, reset, register, getValues, formState: { errors } } = useForm({ mode: "onChange" })
+  const { handleSubmit, reset, register, getValues, formState: { errors, isSubmitting } } = useForm({ mode: "onChange" })
 
   const onSubmit = async (data) => {
     try {
       let response = await registerUser(data)
-      console.log(response)
       setRegisterError(null)
 
-      reset()
-      navigate("/")
-
+      dispatch(authenticate({
+        accessToken: response.data.data.accessToken,
+        user: response.data.data.userData
+      }))
       dispatch(setToast({
         success: true,
         message: response.data.message,
       }))
+      reset()
+      navigate("/")
 
     } catch (error) {
-      setRegisterError(error.response?.data.message)
-      console.log(error.response?.data)
+      setRegisterError(error.response?.data?.message || "Unable to create your account. Please try again.")
     }
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col md:h-screen">
 
       {/* Back Arrow */}
-      <div className="flex items-center px-6 py-4">
+      <div className="flex shrink-0 items-center px-6 py-4">
         <NavLink
           to="/login"
           className="text-neutral-400 hover:text-white transition flex items-center gap-2"
@@ -52,21 +54,21 @@ const Register = () => {
       </div>
 
       {/* Main Row */}
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="flex flex-1 flex-col md:min-h-0 md:flex-row">
 
         {/* Left side - image (hidden on mobile) */}
-        <div className="hidden md:block md:w-1/2 h-full">
-          <img src={imgDesktop} alt="Register Desktop" className="w-full h-screen object-cover" />
+        <div className="hidden md:block md:min-h-0 md:w-1/2">
+          <img src={imgDesktop} alt="Register Desktop" className="h-full min-h-0 w-full object-cover" />
         </div>
 
         {/* Right side - form + mobile image */}
-        <div className="w-full md:w-1/2 flex flex-col h-full px-6 py-6 md:py-10">
+        <div className="flex w-full flex-col px-6 py-6 md:min-h-0 md:w-1/2 md:py-10">
 
           {/* Mobile Image (full width, no space) */}
           <img
             src={imgMobile}
             alt="Register Mobile"
-            className="block md:hidden w-full h-auto object-cover mb-4"
+            className="mb-4 block h-40 w-full object-cover sm:h-56 md:hidden"
           />
 
           {/* Logo + Heading */}
@@ -76,7 +78,7 @@ const Register = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center flex-grow">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col items-center justify-center py-4 md:py-0">
             <div className="w-full max-w-md space-y-6 text-center">
 
               {/* Name */}
@@ -100,7 +102,6 @@ const Register = () => {
                              text-white font-[__helveticaLight_ba7d87]" />
               </div>
               {errors.name && <p className="text-red-500 text-right">{errors.name.message}</p>}
-
 
               {/* Email */}
               <div className="text-left">
@@ -182,8 +183,8 @@ const Register = () => {
 
 
               {/* Register Button */}
-              <button type="submit" className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition font-[__helveticaLight_ba7d87]">
-                Register
+              <button type="submit" disabled={isSubmitting} className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition font-[__helveticaLight_ba7d87] disabled:cursor-not-allowed disabled:opacity-60">
+                {isSubmitting ? "Creating account..." : "Register"}
               </button>
 
 

@@ -1,14 +1,10 @@
-import React from 'react'
 import { useSelector } from 'react-redux'
-import { Outlet, useNavigate } from 'react-router'
+import { Navigate, Outlet } from 'react-router'
 
 const PublicRoute = () => {
-    const Navigate = useNavigate()
-
-    const { isAuthenticated } = useSelector((state) => state.auth)
-    return (
-        !isAuthenticated ? <Outlet /> : <Navigate to="/me" />
-    )
+    const { isAuthenticated, isLoading } = useSelector((state) => state.auth)
+    if (isLoading) return <Outlet />
+    return isAuthenticated ? <Navigate to="/me" replace /> : <Outlet />
 }
 
 export default PublicRoute

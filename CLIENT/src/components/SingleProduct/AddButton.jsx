@@ -2,17 +2,20 @@
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 import { Plus } from "lucide-react"
-import { addToCart } from "../../api/cartApi.jsx"
-import { fetchCart, fetchCartTotal } from "../../api/cartApi.jsx"
+import { useNavigate } from "react-router"
+import { addToCart, fetchCart, fetchCartTotal } from "../../api/cartApi.jsx"
 import { setCart, setTotalPrice, setCartError } from "../../redux/Slice/cartSlice.jsx"
+import { setToast } from "../../redux/Slice/toastSlice"
 
-export default function AddButton({ productId, size }) {
+export default function AddButton({ productId, size, quantity = 1 }) {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [isAdding, setIsAdding] = useState(false)
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (goToCart = false) => {
     if (!productId || !size) {
       dispatch(setCartError("Please select a size first"))
+      dispatch(setToast({ success: false, message: "Please select a size first." }))
       return
     }
 
@@ -20,7 +23,7 @@ export default function AddButton({ productId, size }) {
       setIsAdding(true)
       dispatch(setCartError(null))
 
-      await addToCart(productId, size, 1)
+      await addToCart(productId, size, quantity)
 
       const [{ data: cartData }, { data: totalData }] = await Promise.all([
         fetchCart(),
@@ -29,8 +32,12 @@ export default function AddButton({ productId, size }) {
 
       dispatch(setCart(cartData?.data?.products || cartData?.products || []))
       dispatch(setTotalPrice(totalData?.data?.total ?? totalData?.total ?? totalData?.grandTotal ?? 0))
+      dispatch(setToast({ success: true, message: "Product added to your bag." }))
+      if (goToCart) navigate("/cart")
     } catch (error) {
-      dispatch(setCartError(error.response?.data?.message || "Failed to add product to cart"))
+      const message = error.response?.data?.message || "Failed to add product to your bag."
+      dispatch(setCartError(message))
+      dispatch(setToast({ success: false, message }))
     } finally {
       setIsAdding(false)
     }
@@ -49,9 +56,11 @@ export default function AddButton({ productId, size }) {
 
       <button
         type="button"
-        className="flex flex-1 items-center justify-center bg-black py-3 text-sm uppercase text-white"
+        onClick={() => handleAddToCart(true)}
+        disabled={isAdding}
+        className="flex flex-1 items-center justify-center bg-black py-3 text-sm uppercase text-white disabled:opacity-50"
       >
-        Buy Now
+        {isAdding ? "Please wait..." : "Buy Now"}
       </button>
     </div>
   )

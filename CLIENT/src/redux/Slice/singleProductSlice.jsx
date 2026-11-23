@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit"
 
 const singleProductSlice = createSlice({
   name: "singleProduct",
-  initialState: { product: null, loading: false, error: "" },
+  initialState: { product: null, loading: false, error: "", selectedSize: "" },
   reducers: {
     setSingleProduct: (state, action) => {
       state.product = action.payload
@@ -11,6 +11,10 @@ const singleProductSlice = createSlice({
     },
     clearSingleProduct: (state) => {
       state.product = null
+      state.selectedSize = ""
+    },
+    setSelectedSize: (state, action) => {
+      state.selectedSize = action.payload
     },
     setProductLoading: (state) => {
       state.loading = true
@@ -23,5 +27,5 @@ const singleProductSlice = createSlice({
   }
 })
 
-export const { setSingleProduct, clearSingleProduct, setProductLoading, setProductError } = singleProductSlice.actions
+export const { setSingleProduct, clearSingleProduct, setSelectedSize, setProductLoading, setProductError } = singleProductSlice.actions
 export default singleProductSlice.reducer
