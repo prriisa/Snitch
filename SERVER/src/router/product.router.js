@@ -4,6 +4,7 @@ import { productValidator } from "../validator/product.validator.js"
 import upload from "../config/multer.js"
 import { idValidator, isSeller } from "../middleware/product.middleware.js"
 import { Router } from "express"
+import productModel from "../model/product.model.js"
 
 const router = Router()
 
@@ -25,6 +26,24 @@ router.post(    "/create",
         }
 
         next()
+    },
+
+    async (req, res, next) => {
+        const idempotencyKey = req.get("Idempotency-Key")
+        if (!idempotencyKey) return next()
+        if (!/^[a-zA-Z0-9_-]{16,100}$/.test(idempotencyKey)) {
+            return res.status(400).json({ message: "Invalid product request key." })
+        }
+
+        try {
+            const existingProduct = await productModel.findOne({ idempotencyKey, seller: req.user.id })
+            if (existingProduct) {
+                return res.status(200).json({ message: "Product already listed.", data: { product: existingProduct } })
+            }
+            return next()
+        } catch (error) {
+            return next(error)
+        }
     },
 
     // creating buffer of images with multer

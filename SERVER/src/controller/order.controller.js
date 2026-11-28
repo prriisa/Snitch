@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import cartModel from "../model/cart.model.js"
 import orderModel from "../model/order.model.js"
+import sellerNotificationModel from "../model/sellerNotification.model.js"
 import productModel from "../model/product.model.js"
 
 const requiredAddressFields = ["fullName", "phone", "address", "city", "state", "pincode"]
@@ -10,7 +11,7 @@ const deliveryFeeInRupees = 99
 const freeDeliveryThresholdInRupees = 999
 
 export const createOrderController = async (req, res) => {
-    const { products, shippingAddress, paymentMethod } = req.body || {}
+    const { products, shippingAddress, paymentMethod, buyNow } = req.body || {}
 
     if (!Array.isArray(products) || !products.length) {
         return res.status(400).json({ message: "Add at least one product to the order." })
@@ -55,23 +56,26 @@ export const createOrderController = async (req, res) => {
     let subtotalAmount = 0
     let currency
     let order
+    const sellerProducts = new Map()
 
     try {
-        const cart = await cartModel.findOne({ user: req.user.id })
-        if (!cart) {
-            const error = new Error("Your bag is empty.")
-            error.status = 400
-            throw error
-        }
-
-        for (const item of orderItems) {
-            const cartItem = cart.products.find(
-                (entry) => entry.product.toString() === item.product && entry.size === item.size
-            )
-            if (!cartItem || item.quantity > cartItem.quantity) {
-                const error = new Error("Your bag changed. Refresh it and try again.")
-                error.status = 409
+        if (!buyNow) {
+            const cart = await cartModel.findOne({ user: req.user.id })
+            if (!cart) {
+                const error = new Error("Your bag is empty.")
+                error.status = 400
                 throw error
+            }
+
+            for (const item of orderItems) {
+                const cartItem = cart.products.find(
+                    (entry) => entry.product.toString() === item.product && entry.size === item.size
+                )
+                if (!cartItem || item.quantity > cartItem.quantity) {
+                    const error = new Error("Your bag changed. Refresh it and try again.")
+                    error.status = 409
+                    throw error
+                }
             }
         }
 
@@ -97,6 +101,18 @@ export const createOrderController = async (req, res) => {
             }
             currency = product.price.currency
             subtotalAmount += product.price.amount * item.quantity
+            const sellerId = product.seller.toString()
+            const sellerItems = sellerProducts.get(sellerId) || []
+            sellerItems.push({
+                product: product._id,
+                title: product.title,
+                imageUrl: product.images?.[0]?.url || "",
+                size: item.size,
+                quantity: item.quantity,
+                unitPrice: product.price.amount,
+                currency: product.price.currency
+            })
+            sellerProducts.set(sellerId, sellerItems)
 
             const result = await productModel.updateOne(
                 {
@@ -134,6 +150,19 @@ export const createOrderController = async (req, res) => {
             currency
         })
 
+        try {
+            await sellerNotificationModel.insertMany(
+                Array.from(sellerProducts, ([seller, sellerOrderItems]) => ({
+                    seller,
+                    order: order._id,
+                    customerName: shippingAddress.fullName.trim(),
+                    products: sellerOrderItems
+                }))
+            )
+        } catch (notificationError) {
+            console.error("Could not notify sellers about a new order:", notificationError)
+        }
+
     } catch (error) {
         for (const item of stockChanges) {
             try {
@@ -152,7 +181,7 @@ export const createOrderController = async (req, res) => {
         })
     }
 
-    try {
+    if (!buyNow) try {
         await cartModel.updateOne(
             { user: req.user.id },
             { $pull: { products: { $or: orderItems.map(({ product, size }) => ({ product, size })) } } }
@@ -314,5 +343,74 @@ export const fetchSellerProductSalesController = async (req, res) => {
     } catch (error) {
         console.error("Could not fetch seller product sales:", error)
         return res.status(500).json({ message: "Could not load product sales." })
+    }
+}
+
+export const fetchSellerNotificationsController = async (req, res) => {
+    try {
+        const notifications = await sellerNotificationModel.find({ seller: req.user.id })
+            .sort({ createdAt: -1 })
+            .limit(30)
+            .populate("order", "shippingAddress subtotalAmount platformFee deliveryFee totalAmount currency paymentMethod createdAt")
+            .populate("products.product", "title images price")
+
+        return res.status(200).json({
+            message: "Seller notifications fetched successfully.",
+            data: { notifications }
+        })
+    } catch (error) {
+        console.error("Could not fetch seller notifications:", error)
+        return res.status(500).json({ message: "Could not load seller notifications." })
+    }
+}
+
+export const fetchSellerOrderDetailController = async (req, res) => {
+    const { orderId } = req.params
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+        return res.status(400).json({ message: "Invalid order id." })
+    }
+
+    try {
+        const notification = await sellerNotificationModel.findOne({
+            seller: req.user.id,
+            order: orderId
+        })
+            .populate("order", "shippingAddress subtotalAmount platformFee deliveryFee totalAmount currency paymentMethod createdAt")
+            .populate("products.product", "title images price")
+
+        if (!notification || !notification.order) {
+            return res.status(404).json({ message: "Order not found in your seller notifications." })
+        }
+
+        return res.status(200).json({
+            message: "Seller order details fetched successfully.",
+            data: { notification }
+        })
+    } catch (error) {
+        console.error("Could not fetch seller order details:", error)
+        return res.status(500).json({ message: "Could not load this order." })
+    }
+}
+
+export const markSellerNotificationReadController = async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.notificationId)) {
+        return res.status(400).json({ message: "Invalid notification id." })
+    }
+
+    try {
+        const notification = await sellerNotificationModel.findOneAndUpdate(
+            { _id: req.params.notificationId, seller: req.user.id, readAt: null },
+            { $set: { readAt: new Date() } },
+            { new: true }
+        )
+        if (!notification) return res.status(404).json({ message: "Notification not found." })
+
+        return res.status(200).json({
+            message: "Notification marked as read.",
+            data: { notification }
+        })
+    } catch (error) {
+        console.error("Could not update seller notification:", error)
+        return res.status(500).json({ message: "Could not update this notification." })
     }
 }

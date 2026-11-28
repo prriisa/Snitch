@@ -1,17 +1,17 @@
-import React from "react";
 import { NavLink } from "react-router";
-import { Home, Search, ShoppingBag } from "lucide-react";
+import { Heart, Home, Search, ShoppingBag } from "lucide-react";
 
 const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Shop", path: "/shop", icon: Search },
     { name: "Bag", path: "/cart", icon: ShoppingBag },
+    { name: "Wishlist", path: "/wishlist", icon: Heart },
   ];
 
   return (
     <nav className="fixed bottom-2 left-0 right-0 z-50 w-full max-w-[480px] mx-auto px-6 md:hidden">
-      <div className="grid grid-cols-3 w-full items-center gap-[15px] rounded-md bg-white/40 backdrop-blur-lg shadow px-2">
+      <div className="grid grid-cols-4 w-full items-center gap-1 rounded-md bg-white/90 backdrop-blur-lg shadow px-2">
         {navItems.map(({ name, path, icon: Icon }) => (
           <NavLink key={name} to={path} className="flex-1">
             {({ isActive }) => (

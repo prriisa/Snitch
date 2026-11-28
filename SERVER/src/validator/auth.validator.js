@@ -21,12 +21,10 @@ export const registerValidator = [
         .trim()
         .isLength({ min: 6 }).withMessage("minimum  6 characters are required"),
 
-    
     body("role")
         .optional()
-        .isIn(["user" , "seller"]).withMessage("invalid role"),
-    
-
+        .isString().withMessage("role must be a string").bail()
+        .isIn(["user", "seller"]).withMessage("role must be user or seller"),
 
     (req, res, next) => {
 

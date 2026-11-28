@@ -1,45 +1,26 @@
 import { useNavigate } from "react-router";
+import { productCategories } from "../../utils/productCategories"
 
 const categories = [
   { name: "ALL", bold: true },
-  { name: "SHOP ALL" },
-  { name: "Bestsellers" },
-  { name: "OUTERWEAR" },
-  { name: "Shirts" },
-  { name: "Tops" },
-  { name: "T-Shirts | POLO" },
-  { name: "Jeans" },
-  { name: "Trousers" },
-  { name: "Footwear" },
-  { name: "Cargo pants" },
-  { name: "Joggers" },
-  { name: "SHORTS" },
-  { name: "Overshirts" },
-  { name: "Luggage" },
-  { name: "PERFUMES", badge: "FLAT 50% OFF" },
-  { name: "ACCESSORIES" },
-  { name: "BAGS" },
-  { name: "Belts" },
-  { name: "SUNGLASSES", badge: "AT ₹ 999" },
-  { name: "LINEN EDIT" },
-  { name: "BASICS | CORE LAB" },
-  { name: "Last Chance", red: true },
-  { name: "SNITCH PLUS", badge: "3XL - 6XL" },
-  { name: "SNITCH LUXE", badge: "PREMIUM" },
-  { name: "Celeb Collabs" },
-  { name: "PRICE DROP", red: true },
+  ...productCategories
+    .filter((category) => category !== "Other")
+    .map((name) => ({
+      name,
+      badge: name === "Perfume" ? "FLAT 50% OFF" : name === "Sunglass" ? "AT ₹ 999" : undefined
+    }))
 ];
 
 const ShopCategories = () => {
   const navigate = useNavigate()
 
   const selectCategory = (category) => {
-    const search = ["ALL", "SHOP ALL"].includes(category.name.toUpperCase()) ? "" : category.name
-    navigate(search ? `/shop?search=${encodeURIComponent(search)}` : "/shop")
+    const categoryFilter = category.name.toUpperCase() === "ALL" ? "" : category.name
+    navigate(categoryFilter ? `/shop?category=${encodeURIComponent(categoryFilter)}` : "/shop")
   }
 
   return (
-    <div className="flex items-start max-w-[1440px] mx-auto pt-0">
+    <div id="shop-categories" className="flex items-start max-w-[1440px] mx-auto pt-0">
       <nav className="grid grid-cols-1 md:grid-cols-3 gap-x-0 md:gap-x-20 gap-y-0 md:gap-y-6 shrink-0 pt-0 md:pt-[8px] w-full md:w-auto">
         {categories.map((category) => (
           <button

@@ -43,6 +43,16 @@ export default function AddButton({ productId, size, quantity = 1 }) {
     }
   }
 
+  const handleBuyNow = () => {
+    if (!productId || !size) {
+      dispatch(setCartError("Please select a size first"))
+      dispatch(setToast({ success: false, message: "Please select a size first." }))
+      return
+    }
+
+    navigate("/checkout", { state: { buyNow: { productId, size, quantity } } })
+  }
+
   return (
     <div className="flex w-full gap-3">
       <button
@@ -56,7 +66,7 @@ export default function AddButton({ productId, size, quantity = 1 }) {
 
       <button
         type="button"
-        onClick={() => handleAddToCart(true)}
+        onClick={handleBuyNow}
         disabled={isAdding}
         className="flex flex-1 items-center justify-center bg-black py-3 text-sm uppercase text-white disabled:opacity-50"
       >

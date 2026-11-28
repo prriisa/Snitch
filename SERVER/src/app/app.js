@@ -6,14 +6,12 @@ import cartRoute from "../router/cart.routes.js"
 import cors from "cors"
 import wishlistRoutes from "../router/wishlist.routes.js"
 import orderRouter from "../router/order.router.js"
+import allowedOrigins from "../config/allowedOrigins.js"
 
 const app = express()
 
-app.use(express.json())
+app.use(express.json({ limit: "1mb" }))
 app.use(cookieParser())
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
-    .split(",")
-    .map((origin) => origin.trim())
 app.use(cors({
     origin: allowedOrigins,
     credentials: true

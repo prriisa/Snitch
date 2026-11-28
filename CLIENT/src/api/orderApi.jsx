@@ -8,3 +8,10 @@ export const cancelOrder = (orderId) => axiosInstance.patch(`/order/${orderId}/c
 
 export const fetchSellerProductSales = (productId) =>
     axiosInstance.get(`/order/seller/products/${productId}/sales`)
+
+export const fetchSellerNotifications = () => axiosInstance.get("/order/seller/notifications")
+
+export const fetchSellerOrder = (orderId) => axiosInstance.get(`/order/seller/orders/${orderId}`)
+
+export const markSellerNotificationRead = (notificationId) =>
+    axiosInstance.patch(`/order/seller/notifications/${notificationId}/read`)

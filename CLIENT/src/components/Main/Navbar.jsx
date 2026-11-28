@@ -1,18 +1,49 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router";
+import { Bell } from "lucide-react";
 import useDebouncedThrottledValue from "../../hooks/useDebouncedThrottledValue";
+import { fetchSellerNotifications } from "../../api/orderApi";
 
 const Navbar = () => {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
+    const user = useSelector((state) => state.auth.user)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [searchState, setSearchState] = useState({ locationKey: "", value: "" })
+    const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
     const navigate = useNavigate()
     const location = useLocation()
+    const isSeller = isAuthenticated && user?.role === "seller"
     const currentSearch = new URLSearchParams(location.search).get("search") || ""
     const search = searchState.locationKey === location.key ? searchState.value : currentSearch
     const throttledSearch = useDebouncedThrottledValue(search)
     const lastNavigatedSearch = useRef(currentSearch)
+
+    useEffect(() => {
+        if (!isSeller) return undefined
+
+        let isMounted = true
+        const loadUnreadNotificationCount = async () => {
+            try {
+                const response = await fetchSellerNotifications()
+                const notifications = response.data?.data?.notifications
+                if (isMounted && Array.isArray(notifications)) {
+                    setUnreadNotificationCount(notifications.filter((item) => !item.readAt).length)
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.error("Could not load seller notification count:", error.response?.data?.message || error.message)
+                }
+            }
+        }
+
+        loadUnreadNotificationCount()
+        const intervalId = window.setInterval(loadUnreadNotificationCount, 30000)
+        return () => {
+            isMounted = false
+            window.clearInterval(intervalId)
+        }
+    }, [isSeller, location.pathname])
 
     useEffect(() => {
         const query = throttledSearch.trim()
@@ -62,6 +93,24 @@ const Navbar = () => {
 
                 {/* Right */}
                 <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
+
+                    {isSeller && (
+                        <NavLink
+                            to="/seller/notifications"
+                            aria-label={`Seller notifications${unreadNotificationCount ? `, ${unreadNotificationCount} unread` : ""}`}
+                            title="Seller notifications"
+                            className="flex items-center justify-center"
+                        >
+                            <span className="relative inline-flex">
+                                <Bell size={20} strokeWidth={1.5} className="md:h-7 md:w-7" />
+                                {unreadNotificationCount > 0 && (
+                                    <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#e64b2b] px-1 text-[9px] font-semibold text-white">
+                                        {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                                    </span>
+                                )}
+                            </span>
+                        </NavLink>
+                    )}
 
                     {/* Search */}
                     <button type="button" aria-label={isSearchOpen ? "Close search" : "Search"} aria-expanded={isSearchOpen} onClick={() => setIsSearchOpen((current) => !current)} className="flex items-center justify-center">

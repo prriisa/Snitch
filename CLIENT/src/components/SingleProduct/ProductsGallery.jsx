@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import { setToast } from "../../redux/Slice/toastSlice"
 import {
   checkWishlistItem,
   addWishlistItem,
@@ -11,45 +12,29 @@ const wide = (i) => [0, 3, 4].includes(i % 7)
 
 export default function ProductGallery() {
   const p = useSelector((state) => state.singleProduct.product)
+  const dispatch = useDispatch()
 
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  const [alertMessage, setAlertMessage] = useState("")
-  const [showAlert, setShowAlert] = useState(false)
+  const [wishlistState, setWishlistState] = useState({ productId: "", isWishlisted: false })
   const [isUpdating, setIsUpdating] = useState(false)
+  const isWishlisted = wishlistState.productId === p?._id && wishlistState.isWishlisted
 
   const sliderRef = useRef(null)
-  const alertTimer = useRef(null)
+  const resetSliderTimer = useRef(null)
 
   const images = (p?.images || [])
     .map((img) => typeof img === "string" ? img : img?.url)
     .filter(Boolean)
-
-  const showWishlistAlert = (message) => {
-    if (alertTimer.current) {
-      clearTimeout(alertTimer.current)
-    }
-
-    setAlertMessage(message)
-    setShowAlert(true)
-
-    alertTimer.current = setTimeout(() => {
-      setShowAlert(false)
-      setAlertMessage("")
-      alertTimer.current = null
-    }, 2000)
-  }
+  const mobileImages = images.length > 1 ? [...images, images[0]] : images
 
   useEffect(() => {
     let isMounted = true
-
-    setIsWishlisted(false)
 
     if (!p?._id) return
 
     checkWishlistItem(p._id)
       .then(({ data }) => {
         if (isMounted) {
-          setIsWishlisted(data.exists === true)
+          setWishlistState({ productId: p._id, isWishlisted: data.exists === true })
         }
       })
       .catch((error) => {
@@ -61,22 +46,42 @@ export default function ProductGallery() {
           error.message ||
           "Unable to check wishlist status"
 
-        console.error("Wishlist check failed:", message)
-        showWishlistAlert(message)
+        dispatch(setToast({ success: false, message }))
       })
 
     return () => {
       isMounted = false
     }
-  }, [p?._id])
+  }, [p?._id, dispatch])
 
   useEffect(() => {
+    if (images.length < 2) return undefined
+
+    const timer = window.setInterval(() => {
+      const slider = sliderRef.current
+      if (!slider || document.visibilityState !== "visible" || !window.matchMedia("(max-width: 767px)").matches) return
+
+      const lastImageOffset = slider.clientWidth * (images.length - 1)
+      const nextOffset = slider.scrollLeft >= lastImageOffset - 2
+        ? slider.clientWidth * images.length
+        : slider.scrollLeft + slider.clientWidth
+      slider.scrollTo({ left: nextOffset, behavior: "smooth" })
+    }, 4000)
+
     return () => {
-      if (alertTimer.current) {
-        clearTimeout(alertTimer.current)
-      }
+      window.clearInterval(timer)
+      if (resetSliderTimer.current) window.clearTimeout(resetSliderTimer.current)
     }
-  }, [])
+  }, [images.length])
+
+  const handleMobileSliderScroll = () => {
+    const slider = sliderRef.current
+    if (!slider || images.length < 2 || slider.scrollLeft < slider.clientWidth * images.length - 2) return
+    if (resetSliderTimer.current) window.clearTimeout(resetSliderTimer.current)
+    resetSliderTimer.current = window.setTimeout(() => {
+      slider.scrollTo({ left: 0, behavior: "instant" })
+    }, 450)
+  }
 
   const toggleWishlist = async () => {
     if (!p?._id || isUpdating) return
@@ -87,28 +92,22 @@ export default function ProductGallery() {
       if (isWishlisted) {
         const response = await removeWishlistItem(p._id)
 
-        setIsWishlisted(false)
-        showWishlistAlert(
-          response.data?.message || "Removed from wishlist"
-        )
+        setWishlistState({ productId: p._id, isWishlisted: false })
+        dispatch(setToast({ success: true, message: response.data?.message || "Removed from wishlist." }))
       } else {
         const response = await addWishlistItem(p._id)
 
-        setIsWishlisted(true)
-        showWishlistAlert(
-          response.data?.message || "Added to wishlist"
-        )
+        setWishlistState({ productId: p._id, isWishlisted: true })
+        dispatch(setToast({ success: true, message: response.data?.message || "Added to wishlist." }))
       }
     } catch (error) {
-      console.error("Wishlist API error:", error)
-
       const message =
         error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
         "Something went wrong. Please try again."
 
-      showWishlistAlert(message)
+      dispatch(setToast({ success: false, message }))
     } finally {
       setIsUpdating(false)
     }
@@ -126,15 +125,6 @@ export default function ProductGallery() {
 
   return (
     <div className="relative w-full md:w-[45%] md:shrink-0">
-      {showAlert && (
-        <div
-          role="alert"
-          className="fixed left-2/3 top-5 z-[9999] -translate-x-1/2 rounded-lg bg-black px-5 py-3 text-sm text-white shadow-lg"
-        >
-          {alertMessage}
-        </div>
-      )}
-
       <button
         type="button"
         onClick={toggleWishlist}
@@ -155,9 +145,10 @@ export default function ProductGallery() {
       <div className="relative md:hidden">
         <div
           ref={sliderRef}
+          onScroll={handleMobileSliderScroll}
           className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]"
         >
-          {images.map((src, i) => (
+          {mobileImages.map((src, i) => (
             <img
               key={`${src}-${i}`}
               src={src}

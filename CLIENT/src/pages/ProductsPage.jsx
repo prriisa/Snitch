@@ -50,12 +50,25 @@ export default function ProductsPage() {
         }
     }
 
-    const search = new URLSearchParams(location.search).get("search") || ""
-    const visibleProducts = useMemo(() => filterProductsBySearch(products, search), [products, search])
-
+    const searchParams = new URLSearchParams(location.search)
+    const search = searchParams.get("search") || ""
+    const categoryFilter = searchParams.get("category") || ""
+    const genderFilter = searchParams.get("gender") || ""
+    const minPriceFilter = searchParams.get("minPrice") || ""
+    const maxPriceFilter = searchParams.get("maxPrice") || ""
+    const hasActiveSearch = Boolean(search.trim())
+    const visibleProducts = useMemo(
+        () => filterProductsBySearch(products, search, {
+            category: categoryFilter,
+            gender: genderFilter,
+            minPrice: minPriceFilter,
+            maxPrice: maxPriceFilter
+        }),
+        [products, search, categoryFilter, genderFilter, minPriceFilter, maxPriceFilter]
+    )
     return (
         <section className="w-full px-2 md:px-4 py-4">
-            <Trending />
+            <Trending compact={hasActiveSearch} />
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-1 gap-y-3">
                 {loading

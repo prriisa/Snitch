@@ -17,7 +17,10 @@ const Register = () => {
   const [registerError, setRegisterError] = useState(null)
   const navigate = useNavigate()
  
-  const { handleSubmit, reset, register, getValues, formState: { errors, isSubmitting } } = useForm({ mode: "onChange" })
+  const { handleSubmit, reset, register, getValues, formState: { errors, isSubmitting } } = useForm({
+    mode: "onChange",
+    defaultValues: { role: "user" }
+  })
 
   const onSubmit = async (data) => {
     try {
@@ -181,6 +184,18 @@ const Register = () => {
               </div>
               {errors.confirmPassword && <p className="text-red-500 text-right">{errors.confirmPassword.message}</p>}
 
+              <div className="text-left">
+                <label htmlFor="account-role" className="mb-2 block text-xs font-bold uppercase text-neutral-300">Account Type</label>
+                <select
+                  id="account-role"
+                  {...register("role", { required: "Choose an account type." })}
+                  className="w-full border-b border-neutral-700 bg-black py-3 text-white outline-none focus:border-white"
+                >
+                  <option value="user">User</option>
+                  <option value="seller">Seller</option>
+                </select>
+                {errors.role && <p className="mt-1 text-right text-red-500">{errors.role.message}</p>}
+              </div>
 
               {/* Register Button */}
               <button type="submit" disabled={isSubmitting} className="w-full bg-white text-black py-4 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-neutral-200 transition font-[__helveticaLight_ba7d87] disabled:cursor-not-allowed disabled:opacity-60">

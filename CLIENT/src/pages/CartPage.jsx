@@ -51,20 +51,6 @@ const CartPage = () => {
         return () => { isMounted = false }
     }, [userId, requestCart])
 
-    const loadCart = async () => {
-        setIsLoading(true)
-        try {
-            const cartItems = await requestCart()
-            setItems(cartItems)
-            setSelectedItemIds((current) => current.filter((id) => cartItems.some((item) => item._id === id)))
-            setError("")
-        } catch (requestError) {
-            setError(requestError.response?.data?.message || "Could not load your bag. Please try again.")
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
     const selectedItems = items.filter((item) => selectedItemIds.includes(item._id))
     const currency = selectedItems.find((item) => item.product)?.product?.price?.currency || "INR"
     const hasMixedCurrencies = selectedItems.some((item) => item.product && item.product.price?.currency !== currency)
@@ -84,8 +70,9 @@ const CartPage = () => {
         setUpdatingItemId(item._id)
         setError("")
         try {
-            await updateCartQuantity(item._id, action)
-            await loadCart()
+            const response = await updateCartQuantity(item._id, action)
+            setItems(response.data?.data?.cart?.products || items)
+            setError("")
         } catch (requestError) {
             setError(requestError.response?.data?.message || "Could not update this item's quantity.")
         } finally {
@@ -97,8 +84,9 @@ const CartPage = () => {
         setUpdatingItemId(item._id)
         setError("")
         try {
-            await updateCartSize(item._id, size)
-            await loadCart()
+            const response = await updateCartSize(item._id, size)
+            setItems(response.data?.data?.cart?.products || items)
+            setError("")
         } catch (requestError) {
             setError(requestError.response?.data?.message || "Could not update this item's size.")
         } finally {
@@ -110,8 +98,10 @@ const CartPage = () => {
         setUpdatingItemId(item._id)
         setError("")
         try {
-            await removeCartItem(item._id)
-            await loadCart()
+            const response = await removeCartItem(item._id)
+            setItems(response.data?.data?.cart?.products || items.filter((entry) => entry._id !== item._id))
+            setSelectedItemIds((current) => current.filter((id) => id !== item._id))
+            setError("")
         } catch (requestError) {
             setError(requestError.response?.data?.message || "Could not remove this item from your bag.")
         } finally {

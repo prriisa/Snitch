@@ -3,10 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router"
 import { useDispatch } from "react-redux"
 import { Check, ChevronLeft, MapPin, PackageCheck, Wallet } from "lucide-react"
 import { fetchCart } from "../api/cartApi"
+import { fetchSingleProduct } from "../api/productApi"
 import { createOrder } from "../api/orderApi"
 import { setToast } from "../redux/Slice/toastSlice"
 import { calculateOrderFees } from "../utils/orderFees"
-import { fetchSavedAddresses } from "../api/accountApi"
+import { createSavedAddress, fetchSavedAddresses } from "../api/accountApi"
 
 const initialAddress = {
     fullName: "",
@@ -27,6 +28,7 @@ const CheckoutPage = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const selectedItemIds = location.state?.selectedItemIds
+    const buyNow = location.state?.buyNow
     const [items, setItems] = useState([])
     const [address, setAddress] = useState(initialAddress)
     const [isLoading, setIsLoading] = useState(true)
@@ -36,6 +38,7 @@ const CheckoutPage = () => {
     const [savedAddresses, setSavedAddresses] = useState([])
     const [selectedAddressId, setSelectedAddressId] = useState("")
     const [savedAddressError, setSavedAddressError] = useState("")
+    const [saveAsDefaultAddress, setSaveAsDefaultAddress] = useState(false)
     const hasEditedAddress = useRef(false)
 
     const loadCart = useCallback(async () => {
@@ -71,6 +74,31 @@ const CheckoutPage = () => {
 
     useEffect(() => {
         let isMounted = true
+        if (buyNow) {
+            fetchSingleProduct(buyNow.productId)
+                .then((response) => {
+                    if (!isMounted) return
+                    const product = response.data?.data?.product
+                    if (!product || !product.sizes?.some((entry) => entry.size === buyNow.size)) {
+                        navigate("/shop", { replace: true })
+                        return
+                    }
+                    setItems([{
+                        _id: "buy-now",
+                        product,
+                        size: buyNow.size,
+                        quantity: buyNow.quantity
+                    }])
+                })
+                .catch((requestError) => {
+                    if (isMounted) setError(requestError.response?.data?.message || "Could not load the product you selected.")
+                })
+                .finally(() => {
+                    if (isMounted) setIsLoading(false)
+                })
+            return () => { isMounted = false }
+        }
+
         if (!selectedItemIds?.length) {
             navigate("/cart", { replace: true })
             return undefined
@@ -93,12 +121,12 @@ const CheckoutPage = () => {
                 if (isMounted) setIsLoading(false)
             })
         return () => { isMounted = false }
-    }, [selectedItemIds, loadCart, navigate])
+    }, [selectedItemIds, buyNow, loadCart, navigate])
 
     useEffect(() => {
         if (!placedOrder) return undefined
         const timer = setTimeout(() => {
-            navigate("/orders", { replace: true })
+            navigate(placedOrder.orderId ? `/orders/${placedOrder.orderId}` : "/orders", { replace: true })
         }, 1900)
         return () => clearTimeout(timer)
     }, [placedOrder, navigate])
@@ -150,17 +178,34 @@ const CheckoutPage = () => {
 
         setIsSubmitting(true)
         try {
-            await createOrder({
+            const response = await createOrder({
                 products: items.map((item) => ({
                     product: item.product._id,
                     size: item.size,
                     quantity: item.quantity
                 })),
                 shippingAddress: address,
-                paymentMethod: "COD"
+                paymentMethod: "COD",
+                buyNow: Boolean(buyNow)
             })
-            setPlacedOrder(true)
+            const orderId = response.data?.data?.order?._id
+            let addressSaveMessage = ""
+            if (saveAsDefaultAddress && !selectedAddressId) {
+                try {
+                    await createSavedAddress({
+                        ...address,
+                        label: "Home",
+                        isDefault: true
+                    })
+                } catch (saveError) {
+                    addressSaveMessage = saveError.response?.data?.message || "The order was placed, but the address could not be saved."
+                }
+            }
+            setPlacedOrder({ orderId, addressSaveMessage })
             dispatch(setToast({ success: true, message: "Your order has been placed." }))
+            if (addressSaveMessage) {
+                dispatch(setToast({ success: false, message: addressSaveMessage }))
+            }
         } catch (requestError) {
             setError(requestError.response?.data?.message || "Could not place your order. Please try again.")
         } finally {
@@ -177,7 +222,11 @@ const CheckoutPage = () => {
                     </div>
                     <p className="mt-8 text-xs uppercase tracking-[0.3em] text-neutral-500">Snitch</p>
                     <h1 className="mt-3 text-3xl font-semibold uppercase tracking-wide">Order placed</h1>
-                    <p className="mt-3 text-sm text-neutral-600">Your order is confirmed. Redirecting to your orders...</p>
+                    <p className="mt-3 text-sm text-neutral-600">Your order is confirmed. Redirecting to your order details...</p>
+                    {placedOrder.addressSaveMessage && <p role="alert" className="mt-3 text-sm text-red-700">{placedOrder.addressSaveMessage}</p>}
+                    <Link to={placedOrder.orderId ? `/orders/${placedOrder.orderId}` : "/orders"} className="mt-5 inline-flex border border-black px-5 py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white">
+                        View order details
+                    </Link>
                     <div className="mx-auto mt-7 h-1 w-48 overflow-hidden bg-neutral-200">
                         <div className="order-success-progress h-full bg-black" />
                     </div>
@@ -241,6 +290,12 @@ const CheckoutPage = () => {
                                     <input required name="state" maxLength={80} value={address.state} onChange={updateAddress} placeholder="State" autoComplete="address-level1" className="border border-neutral-300 px-3 py-3 text-sm outline-none focus:border-black" />
                                     <input required name="pincode" maxLength={12} value={address.pincode} onChange={updateAddress} placeholder="PIN code" autoComplete="postal-code" className="border border-neutral-300 px-3 py-3 text-sm outline-none focus:border-black sm:col-span-2" />
                                 </div>
+                                {!selectedAddressId && (
+                                    <label className="mt-4 flex items-center gap-2 text-sm">
+                                        <input type="checkbox" checked={saveAsDefaultAddress} onChange={(event) => setSaveAsDefaultAddress(event.target.checked)} className="h-4 w-4 accent-black" />
+                                        Save this address as my default address
+                                    </label>
+                                )}
                             </section>
 
                             <section className="flex items-center gap-4 border border-black bg-white p-5">

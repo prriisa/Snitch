@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router";
 
 const occasions = [
   {
@@ -57,7 +58,6 @@ const ShopByOccasion = () => {
 
   const [currentIndex, setCurrentIndex] = useState(6);
   const [slideWidth, setSlideWidth] = useState(0);
-  const [visibleSlides, setVisibleSlides] = useState(1);
   const [transition, setTransition] = useState(true);
 
   const slides = [...occasions, ...occasions, ...occasions];
@@ -70,7 +70,6 @@ const ShopByOccasion = () => {
       const width = containerRef.current.offsetWidth;
       const isMobile = window.innerWidth < 768;
 
-      setVisibleSlides(isMobile ? 1 : 3);
       setSlideWidth(isMobile ? width : width / 3);
     };
 
@@ -123,8 +122,9 @@ const ShopByOccasion = () => {
           }}
         >
           {slides.map((occasion, index) => (
-            <div
+            <Link
               key={`${occasion.id}-${index}`}
+              to={`/shop?search=${encodeURIComponent(occasion.title)}`}
               className="relative h-full shrink-0 overflow-hidden"
               style={{
                 width: slideWidth,
@@ -144,7 +144,7 @@ const ShopByOccasion = () => {
                   decoding="async"
                 />
               </picture>
-            </div>
+            </Link>
           ))}
         </div>
 

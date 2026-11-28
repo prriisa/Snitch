@@ -13,6 +13,7 @@ const OrdersPage = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState("")
     const [cancellingOrderId, setCancellingOrderId] = useState("")
+    const [orderToCancel, setOrderToCancel] = useState(null)
 
     useEffect(() => {
         let isMounted = true
@@ -30,8 +31,6 @@ const OrdersPage = () => {
     }, [])
 
     const handleCancelOrder = async (order) => {
-        if (!window.confirm("Cancel this order? The items will be returned to your bag stock.")) return
-
         setError("")
         setCancellingOrderId(order._id)
         try {
@@ -40,6 +39,7 @@ const OrdersPage = () => {
             setOrders((current) => current.map((item) => item._id === order._id
                 ? { ...item, orderStatus: updatedStatus || "CANCELLED" }
                 : item))
+            setOrderToCancel(null)
         } catch (requestError) {
             setError(requestError.response?.data?.message || "Could not cancel this order.")
         } finally {
@@ -73,15 +73,15 @@ const OrdersPage = () => {
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-500">Order #{order._id.slice(-8).toUpperCase()}</p>
                                         <p className="mt-1 text-xs text-neutral-500">{new Date(order.createdAt).toLocaleString()}</p>
+                                        <Link to={`/orders/${order._id}`} className="mt-2 inline-flex text-[10px] uppercase tracking-widest underline hover:text-[#e64b2b]">
+                                            View order details
+                                        </Link>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <div className={`border px-3 py-2 text-[10px] font-semibold uppercase tracking-widest ${order.orderStatus === "CANCELLED" ? "border-red-300 bg-red-50 text-red-700" : order.orderStatus === "RETURNED" ? "border-neutral-300 bg-neutral-100 text-neutral-700" : "border-green-300 bg-green-50 text-green-800"}`}>
-                                            Order status: {order.orderStatus === "CANCELLED" ? "Cancelled" : order.orderStatus === "RETURNED" ? "Returned" : "Confirmed"}
-                                        </div>
                                         {["PLACED", "CONFIRMED"].includes(order.orderStatus) && (
-                                            <button type="button" onClick={() => handleCancelOrder(order)} disabled={cancellingOrderId === order._id} className="inline-flex items-center gap-2 border border-neutral-300 px-3 py-2 text-[10px] font-medium uppercase tracking-widest hover:border-red-600 hover:text-red-700 disabled:opacity-50">
+                                            <button type="button" onClick={() => setOrderToCancel(order)} disabled={cancellingOrderId === order._id} className="inline-flex items-center gap-2 border border-neutral-300 px-3 py-2 text-[10px] font-medium uppercase tracking-widest hover:border-red-600 hover:text-red-700 disabled:opacity-50">
                                                 {cancellingOrderId === order._id && <LoaderCircle size={13} className="animate-spin" />}
-                                                {cancellingOrderId === order._id ? "Cancelling..." : "Cancel order"}
+                                                Cancel order
                                             </button>
                                         )}
                                     </div>
@@ -111,7 +111,7 @@ const OrdersPage = () => {
                                     ))}
                                 </div>
                                 <div className="flex flex-wrap justify-between gap-2 border-t border-neutral-200 pt-4 text-sm">
-                                    <span className="text-neutral-600">Cash on delivery · {order.paymentStatus}</span>
+                                    <span className="text-neutral-600">Cash on delivery</span>
                                     <div className="space-y-1 text-right">
                                         {order.subtotalAmount !== undefined && <p className="text-xs text-neutral-500">Subtotal {formatPrice(order.subtotalAmount, order.currency)}</p>}
                                         {order.platformFee !== undefined && <p className="text-xs text-neutral-500">Platform fee {formatPrice(order.platformFee, order.currency)}</p>}
@@ -124,6 +124,23 @@ const OrdersPage = () => {
                     </div>
                 )}
             </div>
+            {orderToCancel && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4" onClick={(event) => {
+                    if (event.target === event.currentTarget && !cancellingOrderId) setOrderToCancel(null)
+                }}>
+                    <section role="alertdialog" aria-modal="true" aria-labelledby="cancel-order-title" className="w-full max-w-md bg-white p-6 shadow-xl">
+                        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Order #{orderToCancel._id.slice(-8).toUpperCase()}</p>
+                        <h2 id="cancel-order-title" className="mt-2 text-xl font-semibold uppercase">Cancel this order?</h2>
+                        <p className="mt-3 text-sm text-neutral-600">Are you sure you want to cancel? The available stock will be restored.</p>
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button type="button" onClick={() => setOrderToCancel(null)} disabled={Boolean(cancellingOrderId)} className="border border-neutral-300 px-4 py-3 text-xs uppercase tracking-widest disabled:opacity-50">Keep order</button>
+                            <button type="button" onClick={() => handleCancelOrder(orderToCancel)} disabled={Boolean(cancellingOrderId)} className="bg-black px-4 py-3 text-xs uppercase tracking-widest text-white disabled:opacity-50">
+                                {cancellingOrderId ? "Cancelling..." : "Yes, cancel"}
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            )}
         </main>
     )
 }

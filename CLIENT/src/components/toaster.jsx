@@ -15,7 +15,7 @@ const PopupToast = ({ success, message }) => {
   }, [dispatch]);
 
   return (
-    <div className="absolute top-5 left-1/2 z-[9999] -translate-x-1/2">
+    <div className="fixed top-[calc(1.25rem+env(safe-area-inset-top))] left-1/2 z-[9999] -translate-x-1/2">
       <div className="flex min-w-[280px] items-center gap-3 rounded-xl border border-white/10 bg-[#111111] px-4 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#ff5a1f]">
           {success ? (

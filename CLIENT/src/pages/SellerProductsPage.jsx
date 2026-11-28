@@ -16,7 +16,6 @@ const SellerProductsPage = () => {
     const [salesByProductId, setSalesByProductId] = useState({})
     const [salesLoadingId, setSalesLoadingId] = useState("")
     const [salesError, setSalesError] = useState("")
-
     const fetchProducts = useCallback(async () => {
         const response = await fetchAllProducts()
         const allProducts = response.data?.data?.allProducts

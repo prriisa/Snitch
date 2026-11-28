@@ -1,4 +1,5 @@
 import { body, validationResult } from "express-validator"
+import { productCategories } from "../model/product.model.js"
 
 export const productValidator = [
     body("title")
@@ -12,6 +13,14 @@ export const productValidator = [
         .isString().withMessage("Description must be a string").bail()
         .trim().isLength({min:3, max:500}).withMessage("description must be between 3 to 500 characters"),
 
+    body("gender")
+        .exists().withMessage("gender is required").bail()
+        .customSanitizer(gender => gender === "neutral" ? "unisex" : gender)
+        .isIn(["male", "female", "unisex"]).withMessage("gender must be male, female, or unisex"),
+
+    body("category")
+        .exists().withMessage("category is required").bail()
+        .isIn(productCategories).withMessage("Select a valid product category"),
 
     body("price")
         .exists().withMessage("price is required").bail(),

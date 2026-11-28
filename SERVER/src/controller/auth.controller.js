@@ -1,7 +1,7 @@
 import RegisterModel from "../model/auth.model.js"
 import mongoose from "mongoose"
 import bcrypt from "bcryptjs"
-import { createAccessToken, createRefreshToken, readRefreshToken } from "../utils/auth.utils.js"
+import { createAccessToken, createRefreshToken, hashRefreshToken, readRefreshToken } from "../utils/auth.utils.js"
 
 const addressFields = ["fullName", "phone", "address", "city", "state", "pincode"]
 const addressFieldLimits = {
@@ -38,12 +38,17 @@ const refreshCookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/"
+    path: "/api/auth"
+}
+
+const clearRefreshCookies = (res) => {
+    res.clearCookie("refreshToken", refreshCookieOptions)
+    res.clearCookie("refreshToken", { ...refreshCookieOptions, path: "/" })
 }
 
 export const registerUserController = async (req, res) => {
     try {
-        let { name, email, password, role } = req.body
+        let { name, email, password, role = "user" } = req.body
 
         let isRegistered = await RegisterModel.findOne({ email })
         if (isRegistered) {
@@ -62,8 +67,12 @@ export const registerUserController = async (req, res) => {
         const accessToken = createAccessToken(userData._id, userData.role)
         const refreshToken = createRefreshToken(userData._id, userData.role)
 
-        await RegisterModel.findByIdAndUpdate(userData._id, { refreshToken })
+        await RegisterModel.findByIdAndUpdate(userData._id, {
+            $set: { refreshTokenHash: hashRefreshToken(refreshToken) },
+            $unset: { refreshToken: 1 }
+        })
 
+        clearRefreshCookies(res)
         res.cookie("refreshToken", refreshToken, refreshCookieOptions)
 
         res.status(201).json({
@@ -112,8 +121,12 @@ export const loginUserController = async (req, res) => {
         const accessToken = createAccessToken(isRegistered._id, isRegistered.role)
         const refreshToken = createRefreshToken(isRegistered._id, isRegistered.role)
 
-        await RegisterModel.findByIdAndUpdate(isRegistered._id, { refreshToken })
+        await RegisterModel.findByIdAndUpdate(isRegistered._id, {
+            $set: { refreshTokenHash: hashRefreshToken(refreshToken) },
+            $unset: { refreshToken: 1 }
+        })
 
+        clearRefreshCookies(res)
         res.cookie("refreshToken", refreshToken, refreshCookieOptions)
 
         res.status(200).json({
@@ -141,9 +154,10 @@ export const loginUserController = async (req, res) => {
 export const refreshTokenController = async (req, res) => {
 
     try {
-        let { refreshToken } = req.cookies
+        const refreshToken = req.cookies?.refreshToken
 
         if (!refreshToken) {
+            clearRefreshCookies(res)
             return res.status(401).json({
                 message: "Refresh Token not found"
             })
@@ -151,9 +165,16 @@ export const refreshTokenController = async (req, res) => {
 
         const decodedData = readRefreshToken(refreshToken)
 
-        const userData = await RegisterModel.findById(decodedData.id)
+        const userData = await RegisterModel.findById(decodedData.id).select("+refreshToken +refreshTokenHash")
 
-        if (!userData || userData.refreshToken !== refreshToken) {
+        const tokenHash = hashRefreshToken(refreshToken)
+        const matchesStoredToken = userData && (
+            userData.refreshTokenHash === tokenHash ||
+            (!userData.refreshTokenHash && userData.refreshToken === refreshToken)
+        )
+
+        if (!matchesStoredToken) {
+            clearRefreshCookies(res)
             return res.status(401).json({
                 message: "incorrect Refresh Token"
             })
@@ -162,8 +183,19 @@ export const refreshTokenController = async (req, res) => {
         const accessToken = createAccessToken(userData._id, userData.role)
         const newRefreshToken = createRefreshToken(userData._id, userData.role)
 
-        await RegisterModel.findByIdAndUpdate(userData._id, { refreshToken: newRefreshToken })
+        const tokenFilter = userData.refreshTokenHash
+            ? { _id: userData._id, refreshTokenHash: userData.refreshTokenHash }
+            : { _id: userData._id, refreshToken }
+        const rotation = await RegisterModel.updateOne(tokenFilter, {
+            $set: { refreshTokenHash: hashRefreshToken(newRefreshToken) },
+            $unset: { refreshToken: 1 }
+        })
+        if (rotation.modifiedCount !== 1) {
+            clearRefreshCookies(res)
+            return res.status(401).json({ message: "Refresh token has already been used." })
+        }
 
+        clearRefreshCookies(res)
         res.cookie("refreshToken", newRefreshToken, refreshCookieOptions)
 
         res.status(200).json({
@@ -181,6 +213,7 @@ export const refreshTokenController = async (req, res) => {
 
     } catch (error) {
         if (["TokenExpiredError", "JsonWebTokenError", "NotBeforeError"].includes(error.name)) {
+            clearRefreshCookies(res)
             return res.status(401).json({ message: "Refresh token expired or invalid" })
         }
         console.error(error)
@@ -399,8 +432,11 @@ export const logOutController = async (req, res) => {
       })
     }
 
-    await RegisterModel.findByIdAndUpdate(dbUser._id, { refreshToken: null })
-    res.clearCookie("refreshToken", refreshCookieOptions)
+    await RegisterModel.findByIdAndUpdate(dbUser._id, {
+      $set: { refreshTokenHash: null },
+      $unset: { refreshToken: 1 }
+    })
+    clearRefreshCookies(res)
 
     return res.status(200).json({
       message: "User logged out successfully"

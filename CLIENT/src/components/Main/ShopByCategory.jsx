@@ -1,45 +1,56 @@
+import { Link } from "react-router"
+
 const categories = [
     {
+        name: "Shirt",
         id: "59184083-e04f-4aa5-9943-45a749cae980",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/59184083-e04f-4aa5-9943-45a749cae980/1789537038.png?w=90",
     },
     {
+        name: "Jean",
         id: "a783f54d-0e07-4e97-b1e2-abf8846fbef9",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/a783f54d-0e07-4e97-b1e2-abf8846fbef9/1787214770.png?w=90",
     },
     {
+        name: "T-Shirt",
         id: "56ba705d-69df-40b2-b5b5-7f51f7127fbd",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/56ba705d-69df-40b2-b5b5-7f51f7127fbd/1787214782.png?w=90",
     },
     {
+        name: "Trouser",
         id: "333207f2-f3fe-4020-825f-45c4cbd05c9a",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/333207f2-f3fe-4020-825f-45c4cbd05c9a/1787214804.png?w=90",
     },
     {
+        name: "Short",
         id: "df5f9492-53eb-4a12-8db0-4367b77bcd70",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/df5f9492-53eb-4a12-8db0-4367b77bcd70/1787214822.png?w=90",
     },
     {
+        name: "Jogger",
         id: "09898572-d1f8-4b19-887b-96e58bf456c1",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/09898572-d1f8-4b19-887b-96e58bf456c1/1787214838.png?w=90",
     },
     {
+        name: "Accessory",
         id: "2bc1ad6e-4a4c-4fe4-955b-65d28e5d8b36",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/2bc1ad6e-4a4c-4fe4-955b-65d28e5d8b36/1789542270.png?w=90",
     },
     {
+        name: "Footwear",
         id: "8d9d1cbd-1180-487e-b078-4364f8246761",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/8d9d1cbd-1180-487e-b078-4364f8246761/1787292782.png?w=90",
     },
     {
+        name: "Bag",
         id: "0ddd6589-25a3-4d03-91c5-1f411aaaa9b2",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/0ddd6589-25a3-4d03-91c5-1f411aaaa9b2/1789466883.png?w=90",
@@ -70,8 +81,9 @@ const ShopByCategory = () => {
             {/* Categories */}
             <div className="flex overflow-x-auto no-scrollbar">
                 {categories.map((category) => (
-                    <div
+                    <Link
                         key={category.id}
+                        to={`/shop?category=${encodeURIComponent(category.name)}`}
                         className="relative shrink-0 w-[220px] h-[294px] md:w-[289px] md:h-[335px] border-4 border-white bg-[#f9f9f9] cursor-pointer overflow-hidden"
                     >
                         <img
@@ -80,19 +92,20 @@ const ShopByCategory = () => {
                             loading="lazy"
                             className="absolute inset-0 w-full h-full object-cover"
                         />
-                    </div>
+                        <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-2 text-sm font-medium uppercase tracking-wide text-white">{category.name}</span>
+                    </Link>
                 ))}
             </div>
 
             {/* Shop All */}
-            <a
-                href="/shop"
+            <Link
+                to="/shop#shop-categories"
                 className="flex w-fit underline mt-[16px] md:ml-[112px]"
             >
                 <span className="font-normal text-[14px] md:text-[16px]">
-                    SHOP ALL
+                    SEE ALL CATEGORIES
                 </span>
-            </a>
+            </Link>
         </section>
     );
 };

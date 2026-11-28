@@ -70,7 +70,7 @@ export default function SingleProductPage() {
   if (error || !product) return <p className="mt-24 text-center text-sm text-red-500">{error || "Product not found."}</p>
 
   return (
-    <main className="flex flex-col items-center justify-center gap-6 bg-white pt-25 md:flex-row md:items-start md:gap-8 md:pb-10">
+    <main className="flex flex-col items-center justify-center gap-6 bg-white pb-36 pt-25 md:flex-row md:items-start md:gap-8 md:pb-10">
       <ProductGallery />
 
       <div className="w-full md:sticky md:top-[100px] md:w-[45%] md:self-start md:px-5 lg:w-[40%]">
@@ -130,7 +130,7 @@ export default function SingleProductPage() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 w-full max-w-[480px] p-4 md:hidden">
+      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 w-full max-w-[480px] bg-white/95 p-4 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] md:hidden">
         <AddButton productId={product._id} size={selectedSize} quantity={displayedQuantity} />
       </div>
     </main>

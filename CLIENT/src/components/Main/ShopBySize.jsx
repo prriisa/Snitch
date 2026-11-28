@@ -1,9 +1,11 @@
+import { Link } from "react-router";
+
 const ShopYourSize = () => {
   return (
     <section className="w-full">
-      <button
-        type="button"
-        aria-label="Shop your size"
+      <Link
+        to="/shop"
+        aria-label="Shop products"
         className="relative flex w-full h-[120px] md:h-[180px] lg:h-[350px] xl:h-[400px] mb-4 items-center justify-center cursor-pointer bg-white overflow-hidden"
       >
         <img
@@ -12,7 +14,7 @@ const ShopYourSize = () => {
           fetchPriority="high"
           className="absolute inset-0 w-full h-full object-cover"
         />
-      </button>
+      </Link>
     </section>
   );
 };

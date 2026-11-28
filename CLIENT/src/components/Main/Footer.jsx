@@ -1,4 +1,5 @@
-import React from "react";
+import { Link } from "react-router";
+import { productCategories } from "../../utils/productCategories"
 
 const COLORS = {
   footerBg: "#F7EEE8", 
@@ -10,31 +11,7 @@ const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 const bold = { fontFamily: FONT, fontSize: 15, fontWeight: 700 };
 const light = { fontFamily: FONT, fontSize: 13, lineHeight: 1.2 };
 
-const CATEGORIES = [
-  "T-shirts",
-  "Shirts",
-  "Joggers",
-  "Shorts",
-  "Trousers",
-  "Sweatshirts & Hoodies",
-  "Sweaters",
-  "Bags",
-  "Accessories",
-  "Belts",
-  "Blazers",
-  "Boxers",
-  "Cargo Pants",
-  "Chinos",
-  "Co-ords",
-  "Hoodies",
-  "Jackets",
-  "Jeans",
-  "Night Suit & Pyjamas",
-  "Overshirt",
-  "Perfumes",
-  "Shoes",
-  "Sunglasses",
-];
+const CATEGORIES = productCategories.filter((category) => category !== "Other");
 
 const POPULAR = [
   "shirts for men",
@@ -115,7 +92,7 @@ const COMPANY = [
   "Stakeholders",
 ];
 
-const LinkGrid = ({ title, items, grid }) => (
+const LinkGrid = ({ title, items, grid, filterable = false, categoryFilter = false }) => (
   <div className="mb-3 mx-4">
     <h2 className="uppercase text-black text-left mb-1" style={bold}>
       {title}
@@ -123,7 +100,13 @@ const LinkGrid = ({ title, items, grid }) => (
     <ul className={`grid ${grid} gap-x-2 gap-y-0.5 justify-start list-none p-0 m-0`}>
       {items.map((t, i) => (
         <li key={i} className="text-black text-left py-0.5" style={light}>
-          {t}
+          {filterable ? (
+            <Link to={categoryFilter
+              ? `/shop?category=${encodeURIComponent(t)}`
+              : `/shop?search=${encodeURIComponent(t)}`} className="hover:underline">
+              {t}
+            </Link>
+          ) : t}
         </li>
       ))}
     </ul>
@@ -397,18 +380,22 @@ export default function SnitchFooter() {
             title="Top Categories"
             items={CATEGORIES}
             grid="grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7"
+            filterable
+            categoryFilter
           />
           <br />
           <LinkGrid
             title="Popular Searches"
             items={POPULAR}
             grid="grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7"
+            filterable
           />
           <br />
           <LinkGrid
             title="Most Popular Accessories"
             items={ACCESSORIES}
             grid="grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            filterable
           />
 
           <Editorial />

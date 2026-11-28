@@ -74,7 +74,13 @@ const RegisterSchema = new mongoose.Schema({
     }],
     refreshToken: {
         type: String,
-        default: null
+        default: null,
+        select: false
+    },
+    refreshTokenHash: {
+        type: String,
+        default: null,
+        select: false
     }
 },{timestamps:true})
 

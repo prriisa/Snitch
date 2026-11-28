@@ -1,35 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router";
 
 const offers = [
     {
         id: 1,
         title: "BUY 3 TOPWEAR",
+        to: "/shop?category=Top",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/shop-by-price/e8ed8e35-4c54-4713-827a-756f77d2e123/1790573544.jpeg?w=90",
     },
     {
         id: 2,
         title: "BUY 2 BOTTOM WEAR",
+        to: "/shop?category=Trouser",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/shop-by-price/66f44d39-c9ed-4892-8188-28960c14852b/1790573692.jpeg?w=90",
     },
     {
         id: 3,
         title: "SHIRTS UNDER 999",
+        to: "/shop?category=Shirt&maxPrice=999",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/shop-by-price/a51c53ef-4b07-4dd4-8df4-ae1b547df51e/1790573606.jpeg?w=90",
     },
     {
         id: 4,
         title: "SUNGLASSES",
+        to: "/shop?category=Sunglass",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/shop-by-price/63abd977-30f5-44e3-8a08-9e9cfb066352/1790573566.jpeg?w=90",
     },
 ];
 
 const ShopByPrice = () => {
-    const mobileContainerRef = useRef(null);
     const desktopContainerRef = useRef(null);
 
     const [mobileIndex, setMobileIndex] = useState(4);
@@ -38,7 +42,6 @@ const ShopByPrice = () => {
     const [mobileTransition, setMobileTransition] = useState(true);
     const [desktopTransition, setDesktopTransition] = useState(true);
 
-    const [mobileContainerWidth, setMobileContainerWidth] = useState(0);
     const [desktopContainerWidth, setDesktopContainerWidth] = useState(0);
 
     const [mobileAnimating, setMobileAnimating] = useState(false);
@@ -70,12 +73,6 @@ const ShopByPrice = () => {
 
     useEffect(() => {
         const updateWidth = () => {
-            if (mobileContainerRef.current) {
-                setMobileContainerWidth(
-                    mobileContainerRef.current.offsetWidth
-                );
-            }
-
             if (desktopContainerRef.current) {
                 setDesktopContainerWidth(
                     desktopContainerRef.current.offsetWidth
@@ -282,7 +279,6 @@ const ShopByPrice = () => {
                 {/* CARDS VIEWPORT */}
 
                 <div
-                    ref={mobileContainerRef}
                     className="absolute bottom-[34px] left-0 right-0 z-20 overflow-hidden"
                 >
                     <div
@@ -296,9 +292,9 @@ const ShopByPrice = () => {
                         }}
                     >
                         {slides.map((offer, index) => (
-                            <button
+                            <Link
                                 key={`${offer.id}-${index}`}
-                                type="button"
+                                to={offer.to}
                                 className="relative h-[110px] w-[289px] shrink-0 overflow-hidden rounded-[2px]"
                             >
                                 <img
@@ -308,7 +304,7 @@ const ShopByPrice = () => {
                                     loading="lazy"
                                     decoding="async"
                                 />
-                            </button>
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -389,9 +385,9 @@ const ShopByPrice = () => {
                         }}
                     >
                         {slides.map((offer, index) => (
-                            <button
+                            <Link
                                 key={`${offer.id}-${index}`}
-                                type="button"
+                                to={offer.to}
                                 className="group relative h-[110px] w-[289px] shrink-0 overflow-hidden rounded-[2px]"
                             >
                                 <img
@@ -403,7 +399,7 @@ const ShopByPrice = () => {
                                 />
 
                                 <div className="absolute inset-0 bg-[#F3F3F3] opacity-0 transition-opacity duration-300 group-hover:opacity-20" />
-                            </button>
+                            </Link>
                         ))}
                     </div>
 

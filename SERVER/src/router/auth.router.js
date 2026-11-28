@@ -14,6 +14,7 @@ import {
 } from "../controller/auth.controller.js"
 import { loginValidator, registerValidator } from "../validator/auth.validator.js"
 import authenticate from "../middleware/auth.middleware.js"
+import allowedOrigins from "../config/allowedOrigins.js"
 
 let authRouter = Router()
 
@@ -21,7 +22,13 @@ authRouter.post("/register", registerValidator, registerUserController)
 
 authRouter.post("/login", loginValidator, loginUserController)
 
-authRouter.get("/refresh", refreshTokenController)
+authRouter.post("/refresh", (req, res, next) => {
+    const origin = req.get("origin")
+    if (origin && !allowedOrigins.includes(origin)) {
+        return res.status(403).json({ message: "Refresh requests must come from the trusted app origin." })
+    }
+    next()
+}, refreshTokenController)
 
 authRouter.post("/me", authenticate, getMe)
 authRouter.patch("/me", authenticate, updateMyProfileController)

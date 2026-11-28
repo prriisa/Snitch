@@ -4,24 +4,55 @@ import uploadFiles, { DeleteFiles } from "../services/storage.service.js"
 export const createNewProductController = async (req, res) => {
     const uploadedImgs = []
     try {
-        const { title, description, price, sizes } = req.body
+        const { title, description, price, sizes, gender, category } = req.body
+        const idempotencyKey = req.get("Idempotency-Key")
+        if (idempotencyKey && !/^[a-zA-Z0-9_-]{16,100}$/.test(idempotencyKey)) {
+            return res.status(400).json({ message: "Invalid product request key." })
+        }
+        if (idempotencyKey) {
+            const existingProduct = await productModel.findOne({ idempotencyKey, seller: req.user.id })
+            if (existingProduct) {
+                return res.status(200).json({ message: "Product already listed.", data: { product: existingProduct } })
+            }
+        }
         const files = req.files || []
 
-        for (let i = 0; i < files.length; i++) {
-            const response = await uploadFiles(files[i].buffer, files[i].originalname)
-            uploadedImgs.push({ url: response.url, fileId: response.fileId })
+        const uploadResults = await Promise.allSettled(files.map((file) => uploadFiles(file.buffer, file.originalname)))
+        for (const result of uploadResults) {
+            if (result.status === "fulfilled") {
+                uploadedImgs.push({ url: result.value.url, fileId: result.value.fileId })
+            }
+        }
+        const failedUpload = uploadResults.find((result) => result.status === "rejected")
+        if (failedUpload) {
+            await Promise.all(uploadedImgs.map((image) => DeleteFiles(image.fileId)))
+            uploadedImgs.length = 0
+            throw failedUpload.reason
         }
 
-        const product = await productModel.create({
+        const productData = {
             title,
             description,
             price,
             sizes,
             images: uploadedImgs,
+            gender,
+            category,
             seller: req.user.id
-        })
+        }
+        if (idempotencyKey) productData.idempotencyKey = idempotencyKey
+        let product
+        try {
+            product = await productModel.create(productData)
+        } catch (error) {
+            if (error.code !== 11000 || !idempotencyKey) throw error
+            await Promise.all(uploadedImgs.map((image) => DeleteFiles(image.fileId)))
+            uploadedImgs.length = 0
+            product = await productModel.findOne({ idempotencyKey, seller: req.user.id })
+            if (!product) throw error
+        }
 
-        res.status(200).json({
+        return res.status(201).json({
             message: "product listed successfully",
             data: { product }
         })
@@ -186,6 +217,8 @@ export const updateProductController = async (req, res) => {
         product.description = description
         product.price = price
         product.sizes = sizes
+        product.gender = req.body.gender
+        product.category = req.body.category
         product.images = finalImages
 
         await product.save()

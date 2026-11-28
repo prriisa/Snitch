@@ -1,5 +1,11 @@
 import mongoose from "mongoose"
 
+export const productCategories = [
+    "Shirt", "Top", "T-Shirt", "Jean",
+    "Trouser", "Footwear", "Cargo pant", "Jogger", "Short", "Overshirt",
+    "Luggage", "Perfume", "Accessory", "Bag", "Belt", "Dress", "Sunglass", "Sweater", "Jacket", "Other"
+]
+
 const productSchema = new mongoose.Schema({
     title: {
         required: true,
@@ -12,6 +18,22 @@ const productSchema = new mongoose.Schema({
         type: String,
         minLength: 3,
         maxLength: 500
+    },
+    gender: {
+        type: String,
+        required: true,
+        enum: ["male", "female", "unisex"],
+        default: "unisex"
+    },
+    category: {
+        type: String,
+        required: true,
+        enum: [...productCategories],
+        default: "Other"
+    },
+    idempotencyKey: {
+        type: String,
+        select: false
     },
     images: {
         type: [{
@@ -61,6 +83,11 @@ const productSchema = new mongoose.Schema({
         ref: "RegisteredUsers"
     }
 }, { timestamps: true })
+
+productSchema.index(
+    { seller: 1, idempotencyKey: 1 },
+    { unique: true, partialFilterExpression: { idempotencyKey: { $type: "string" } } }
+)
 
 const productModel = mongoose.model("products", productSchema)
 

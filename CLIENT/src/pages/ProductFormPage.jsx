@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { useForm } from "react-hook-form"
 import { useSelector } from "react-redux"
 import { createProduct, fetchAllProducts, updateProduct } from "../api/productApi"
+import { normalizeProductCategory, productCategories } from "../utils/productCategories"
 
 const availableSizes = ["Free Size", "XS", "S", "M", "L", "XL", "XXL", "XXXL"]
 
@@ -18,6 +19,7 @@ const ProductFormPage = () => {
     const [hasLoadedProduct, setHasLoadedProduct] = useState(!isEditing)
     const [formError, setFormError] = useState("")
     const objectUrls = useRef(new Set())
+    const [createRequestKey, setCreateRequestKey] = useState("")
     const {
         register,
         handleSubmit,
@@ -25,7 +27,7 @@ const ProductFormPage = () => {
         formState: { errors, isSubmitting }
     } = useForm({
         mode: "onChange",
-        defaultValues: { title: "", description: "", amount: "", currency: "INR" }
+        defaultValues: { title: "", description: "", amount: "", currency: "INR", gender: "unisex", category: "Other" }
     })
 
     const imageCount = images.length
@@ -48,7 +50,9 @@ const ProductFormPage = () => {
                     title: product.title || "",
                     description: product.description || "",
                     amount: product.price?.amount ?? "",
-                    currency: product.price?.currency || "INR"
+                    currency: product.price?.currency || "INR",
+                    gender: product.gender === "neutral" ? "unisex" : product.gender || "unisex",
+                    category: normalizeProductCategory(product.category || "Other")
                 })
                 setSizes((product.sizes || []).map(({ size, stock }) => ({ size, stock })))
                 setImages((product.images || []).map((image) => ({ type: "existing", fileId: image.fileId, url: image.url })))
@@ -129,6 +133,8 @@ const ProductFormPage = () => {
         formData.append("description", data.description.trim())
         formData.append("price", JSON.stringify({ amount: Number(data.amount), currency: data.currency }))
         formData.append("sizes", JSON.stringify(sizes.map(({ size, stock }) => ({ size, stock: Number(stock) }))))
+        formData.append("gender", data.gender)
+        formData.append("category", data.category)
 
         if (isEditing) {
             formData.append("images", JSON.stringify(images.map((image) => image.type === "existing"
@@ -141,7 +147,20 @@ const ProductFormPage = () => {
 
         try {
             if (isEditing) await updateProduct(id, formData)
-            else await createProduct(formData)
+            else {
+                let requestKey = createRequestKey
+                if (!requestKey) {
+                    if (window.crypto?.randomUUID) {
+                        requestKey = window.crypto.randomUUID()
+                    } else {
+                        const bytes = new Uint8Array(16)
+                        window.crypto.getRandomValues(bytes)
+                        requestKey = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
+                    }
+                    setCreateRequestKey(requestKey)
+                }
+                await createProduct(formData, requestKey)
+            }
             navigate("/seller/products", { replace: true })
         } catch (requestError) {
             setFormError(requestError.response?.data?.message || "Could not save your product. Check the details and try again.")
@@ -171,8 +190,6 @@ const ProductFormPage = () => {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-5 md:p-8">
-                        {formError && <p role="alert" className="border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</p>}
-
                         <div className="grid gap-5 md:grid-cols-2">
                             <label className="block text-xs font-medium uppercase tracking-widest md:col-span-2">
                                 Product name
@@ -212,6 +229,22 @@ const ProductFormPage = () => {
                                 <select {...register("currency", { required: true })} className="mt-2 w-full border border-neutral-300 bg-white px-3 py-3 text-sm normal-case tracking-normal outline-none focus:border-black">
                                     <option value="INR">INR - Indian Rupee</option>
                                     <option value="USD">USD - US Dollar</option>
+                                </select>
+                            </label>
+                            <label className="block text-xs font-medium uppercase tracking-widest">
+                                Gender
+                                <select {...register("gender", { required: true })} className="mt-2 w-full border border-neutral-300 bg-white px-3 py-3 text-sm normal-case tracking-normal outline-none focus:border-black">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="unisex">Unisex</option>
+                                </select>
+                            </label>
+                            <label className="block text-xs font-medium uppercase tracking-widest">
+                                Category
+                                <select {...register("category", { required: true })} className="mt-2 w-full border border-neutral-300 bg-white px-3 py-3 text-sm normal-case tracking-normal outline-none focus:border-black">
+                                    {productCategories.map((category) => (
+                                        <option key={category} value={category}>{category}</option>
+                                    ))}
                                 </select>
                             </label>
                         </div>
@@ -273,6 +306,7 @@ const ProductFormPage = () => {
                             )}
                         </section>
 
+                        {formError && <p role="alert" className="border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">{formError}</p>}
                         <div className="flex flex-col-reverse gap-3 border-t border-neutral-200 pt-5 sm:flex-row sm:justify-end">
                             <Link to="/seller/products" className="px-5 py-3 text-center text-xs uppercase tracking-widest text-neutral-600 hover:text-black">Cancel</Link>
                             <button type="submit" disabled={isSubmitting || !images.length || isLoadingProduct} className="bg-black px-6 py-3 text-xs font-medium uppercase tracking-widest text-white hover:bg-[#e64b2b] disabled:cursor-not-allowed disabled:opacity-50">

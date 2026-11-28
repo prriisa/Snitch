@@ -18,9 +18,12 @@ const ShopPage = lazy(() => import("../pages/ShopPage"));
 const SingleProductPage = lazy(() => import("../pages/SingleProductPage"));
 const Me = lazy(() => import("../components/Main/Me"));
 const SellerProductsPage = lazy(() => import("../pages/SellerProductsPage"));
+const SellerNotificationsPage = lazy(() => import("../pages/SellerNotificationsPage"));
+const SellerOrderDetailPage = lazy(() => import("../pages/SellerOrderDetailPage"));
 const ProductFormPage = lazy(() => import("../pages/ProductFormPage"));
 const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
 const OrdersPage = lazy(() => import("../pages/OrdersPage"));
+const OrderDetailPage = lazy(() => import("../pages/OrderDetailPage"));
 const PersonalInformationPage = lazy(() => import("../pages/PersonalInformationPage"));
 const SavedAddressesPage = lazy(() => import("../pages/SavedAddressesPage"));
 
@@ -50,11 +53,14 @@ const router = createBrowserRouter([
           { path: "account/addresses", element: renderPage(SavedAddressesPage) },
           { path: "checkout", element: renderPage(CheckoutPage) },
           { path: "orders", element: renderPage(OrdersPage) },
+          { path: "orders/:orderId", element: renderPage(OrderDetailPage) },
           { path: "order", element: renderPage(OrdersPage) },
           {
             element: <SellerRoute />,
             children: [
               { path: "seller/products", element: renderPage(SellerProductsPage) },
+              { path: "seller/notifications", element: renderPage(SellerNotificationsPage) },
+              { path: "seller/orders/:orderId", element: renderPage(SellerOrderDetailPage) },
               { path: "seller/create-product", element: renderPage(ProductFormPage) },
               { path: "seller/products/:id/edit", element: renderPage(ProductFormPage) }
             ]
