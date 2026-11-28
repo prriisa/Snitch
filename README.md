@@ -1,192 +1,122 @@
-# Snitch – E-Commerce Platform
+# SNITCH
 
-Snitch is a full-stack e-commerce application designed to provide a smooth online shopping experience with product browsing, cart management, wishlist functionality, and seller-side product management.
+SNITCH is a responsive, full-stack fashion e-commerce application built as an educational project. It demonstrates a complete shopping flow—from browsing and filtering products to placing a cash-on-delivery order—alongside seller tools for managing products and reviewing orders.
 
-The platform follows a **single-seller model**, meaning there is only one seller who manages the store. Customers can explore products and shop through the application, while the seller has access to the seller dashboard and all available seller functionalities.
+> **Educational use only.** This project is not a production-ready store. It does not process online payments, and the sample seller credentials below must only be used with an isolated demo database. Do not reuse the sample password or put real customer or payment data into this application.
 
-## ✨ Features
+## What the app can do
 
-### 🛍️ Customer Features
+### Shopping
 
-- **Product Browsing:** Explore the products available in the store.
-- **Product Details:** View detailed information about individual products.
-- **Shopping Cart:** Add products to the cart and manage cart items.
-- **Wishlist:** Save favourite products for later.
-- **Authentication:** Secure login and registration functionality.
-- **Responsive UI:** Enjoy the application across different screen sizes.
+- Browse the storefront and shop pages on desktop or mobile.
+- Search product names and filter by category, gender, and price.
+- Open product details, view images, choose a size, and check availability.
+- Add items to a cart or wishlist, then update cart quantities and sizes.
+- Use **Buy Now** to check out a single selected product.
+- Save and manage delivery addresses, including a default address.
+- Place **cash-on-delivery (COD)** orders, view order details, and request cancellations.
 
-### 👨‍💼 Seller Features
+### Seller tools
 
-Snitch follows a single-seller architecture. There are no multiple seller registrations or separate seller accounts.
+- Create, edit, and remove product listings.
+- Add product images and set product details, category, gender, price, sizes, and stock.
+- Review order notifications, including order and delivery information.
+- Open a seller order's full details and view product sales information.
 
-The application has one dedicated seller account. Once logged in with the seller credentials, you can access all the seller-side features available in the application.
+### Product categories
 
-Depending on the implemented functionality, these include:
+The product form and product filters share these categories:
 
-- Accessing the seller dashboard.
-- Managing store products.
-- Adding new products.
-- Updating existing product information.
-- Managing product listings.
-- Accessing seller-specific functionality.
+`Shirt`, `Top`, `T-Shirt`, `Jean`, `Trouser`, `Footwear`, `Cargo pant`, `Jogger`, `Short`, `Overshirt`, `Luggage`, `Perfume`, `Accessory`, `Bag`, `Belt`, `Dress`, `Sunglass`, `Sweater`, `Jacket`, and `Other`.
 
-**Note:** The seller account has access to all seller features; customers do not need a separate seller registration.
+Products can be classified as `male`, `female`, or `unisex`.
 
-## 🔐 Seller Login Credentials
+## Demo seller account
 
-Use the following demo credentials to access the seller side of the application:
-
-| Field | Credentials |
+| Field | Value |
 |---|---|
-| Account Type | Seller |
-| Email | `priya@gmail.com` |
+| Email | `seller@gmail.com` |
 | Password | `Test001@` |
+| Account type | Seller |
 
-**How to access seller features:**
+The repository does not automatically seed this account. The credentials work only in a demo environment where the account has been created in the connected database. If it is not present, register a demo account using this email and password and select **Seller**.
 
-1. Open the Snitch application.
-2. Navigate to the Login page.
-3. Enter the seller email address.
-4. Enter the seller password.
-5. Log in to access the seller-side features.
+Treat these credentials as public. Anyone who can access the demo environment may be able to use them. Change or disable the account before deploying anywhere that contains non-demo data.
 
-> **Important:** These are demo credentials. Do not use real or sensitive account credentials in a publicly accessible repository.
+## Technology
 
-## 🧑‍💻 Technology Stack
+- **Client:** React, Vite, React Router, Redux Toolkit, Tailwind CSS, Axios
+- **Server:** Node.js, Express, Mongoose, MongoDB
+- **Authentication:** JWT access tokens and a rotating, HTTP-only refresh-token cookie
+- **Product images:** ImageKit
 
-### Frontend
-- React.js
-- React Router
-- Redux Toolkit
-- Tailwind CSS
-- Axios
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JSON Web Token (JWT)
-- ImageKit
-
-## 📁 Project Structure
-
-The project is organized into two main directories:
+## Project layout
 
 ```text
 Snitch/
-│
-├── CLIENT/
-│   └── React frontend application
-│
-├── SERVER/
-│   └── Express backend application
-│
+├── CLIENT/   React storefront, account pages, seller screens, and client-side state
+├── SERVER/   Express API, authentication, business logic, and MongoDB models
 └── README.md
 ```
 
-### CLIENT
+The API is organized under `/api/auth`, `/api/product`, `/api/cart`, `/api/wishlist`, and `/api/order`.
 
-Contains the frontend application, including the user interface, pages, reusable components, routing, and state management.
+## Run locally
 
-### SERVER
+### Requirements
 
-Contains the backend application, including API routes, controllers, database models, authentication, and server-side logic.
+- Node.js and npm
+- A MongoDB database
+- An ImageKit account and private key for seller product-image uploads
 
-## ⚙️ Installation and Setup
+### 1. Configure the server
 
-### 1. Clone the Repository
+Create `SERVER/.env` with the following variables:
 
-```bash
-git clone https://github.com/prriisa/Snitch.git
+```dotenv
+PORT=3000
+MONGO_URI=your_mongodb_connection_string
+ACCESS_JWT=your_long_random_access_token_secret
+REFRESH_JWT=your_different_long_random_refresh_token_secret
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 ```
 
-### 2. Navigate to the Project
+Use unique, strong secret values for the JWT variables. Keep this file private; `.env` files are ignored by Git and must never be committed.
 
-```bash
-cd Snitch
-```
+### 2. Install and start the API
 
-### 3. Install Frontend Dependencies
+In a terminal from the repository root:
 
-```bash
-cd CLIENT
-npm install
-```
-
-### 4. Install Backend Dependencies
-
-Open another terminal:
-
-```bash
+```powershell
 cd SERVER
 npm install
-```
-
-### 5. Configure Environment Variables
-
-Create the required `.env` files for the frontend and backend.
-
-Configure the environment variables required by the application, such as:
-
-- MongoDB connection string.
-- JWT secret.
-- ImageKit credentials.
-- Backend API URL.
-
-Use the variable names expected by the existing source code. Never commit real `.env` files or secrets to GitHub.
-
-### 6. Run the Application
-
-Start the backend:
-
-```bash
-cd SERVER
 npm run dev
 ```
 
-Start the frontend in another terminal:
+The API connects to MongoDB before it starts listening. The client’s Vite development proxy targets `http://127.0.0.1:3000`, so keep the server `PORT` at `3000` for local development.
 
-```bash
+### 3. Install and start the client
+
+In a second terminal from the repository root:
+
+```powershell
 cd CLIENT
+npm install
 npm run dev
 ```
 
-The exact commands may vary depending on the scripts defined in each `package.json`.
+Open the local URL printed by Vite (normally `http://localhost:5173`). The client sends `/api` requests through its development proxy to the local server.
 
-## 🔒 Authentication and Seller Architecture
+## Deployment
 
-Snitch uses a single-seller approach.
+The repository includes a root `vercel.json` configured to deploy the client and Express API as separate Vercel services. Configure `MONGO_URI`, `ACCESS_JWT`, `REFRESH_JWT`, and `IMAGEKIT_PRIVATE_KEY` in the server service's environment settings. Never put secrets in client-side environment variables or commit them to the repository.
 
-Unlike multi-vendor marketplaces, this application does not allow multiple sellers to register and independently manage their stores.
+## Important limitations
 
-Instead:
+- Checkout currently supports COD only; no online payment provider is integrated.
+- Seller registration is available in the demo UI. This is convenient for evaluation, but it is not a production seller-verification or onboarding process.
+- Use a separate demo database and demo credentials. Do not use real customer information or treat the application as a production commerce or security system without further review and hardening.
 
-- There is one seller account.
-- The seller can access all available seller-side functionality.
-- Customers can browse products and use shopping features.
-- Seller functionality is intended to be restricted to the authenticated seller.
+## License
 
-## 🚀 Future Improvements
-
-Potential enhancements for the application include:
-
-- Order management and order tracking.
-- Payment gateway integration.
-- Improved seller analytics.
-- Product inventory management.
-- Customer reviews and ratings.
-- Enhanced search and filtering.
-- Order notifications.
-
-## 👩‍💻 Author
-
-**Priya Sharma**
-
-GitHub: [@prriisa](https://github.com/prriisa)
-
----
-
-⭐ If you find this project interesting, feel free to explore the repository and its implementation.
-
-**Snitch – A Single-Seller E-Commerce Platform.**
+No license is currently specified in this repository. Contact the project owner before reusing or redistributing it.
