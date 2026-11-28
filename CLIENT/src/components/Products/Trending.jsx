@@ -65,7 +65,7 @@ const Trending = ({ compact = false }) => {
       <div className={`sticky top-[var(--snitch-header-h,74px)] z-30 bg-white flex flex-col items-start gap-3 ${compact ? "pt-2" : "pt-4"}`}>
         {!compact && <h2 className="px-4 uppercase text-[24px] leading-[26px] md:text-[36px] md:leading-none font-bold">Trending</h2>}
         <div className="flex w-full items-center gap-5 overflow-x-auto border-b border-[rgba(0,0,0,0.1)] px-3 pt-3 no-scrollbar">
-          <button type="button" onClick={openFilters} aria-label="Open product filters" className="flex shrink-0 items-center justify-center p-1 hover:text-[#e64b2b]">
+          <button type="button" onClick={openFilters} aria-label="Open product filters" className="flex shrink-0 items-center justify-center px-1 pt-1 pb-3 hover:text-[#e64b2b]">
             <Menu size={21} strokeWidth={1.6} />
           </button>
           {categories.map((category) => {
