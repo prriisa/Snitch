@@ -8,7 +8,7 @@ const categories = [
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/59184083-e04f-4aa5-9943-45a749cae980/1789537038.png?w=90",
     },
     {
-        name: "Jean",
+        name: "Trouser",
         id: "a783f54d-0e07-4e97-b1e2-abf8846fbef9",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/a783f54d-0e07-4e97-b1e2-abf8846fbef9/1787214770.png?w=90",
@@ -20,7 +20,7 @@ const categories = [
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/56ba705d-69df-40b2-b5b5-7f51f7127fbd/1787214782.png?w=90",
     },
     {
-        name: "Trouser",
+        name: "Jean",
         id: "333207f2-f3fe-4020-825f-45c4cbd05c9a",
         image:
             "https://d2d5n4ft74bagm.cloudfront.net/media/featured-category/333207f2-f3fe-4020-825f-45c4cbd05c9a/1787214804.png?w=90",
@@ -92,7 +92,6 @@ const ShopByCategory = () => {
                             loading="lazy"
                             className="absolute inset-0 w-full h-full object-cover"
                         />
-                        <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-2 text-sm font-medium uppercase tracking-wide text-white">{category.name}</span>
                     </Link>
                 ))}
             </div>
