@@ -48,7 +48,7 @@ const clearRefreshCookies = (res) => {
 
 export const registerUserController = async (req, res) => {
     try {
-        let { name, email, password, role = "user" } = req.body
+        let { name, email, password } = req.body
 
         let isRegistered = await RegisterModel.findOne({ email })
         if (isRegistered) {
@@ -60,7 +60,7 @@ export const registerUserController = async (req, res) => {
         let userData = await RegisterModel.create({
             name,
             email,
-            role,
+            role: "user",
             passwordHash: await bcrypt.hash(password, 10)
         })
 
